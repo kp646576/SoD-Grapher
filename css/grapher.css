@@ -1,3 +1,8 @@
+.axis-label{
+    font-family: Tahoma;
+    font-size: 15px;
+}
+
 .axis path {
     fill: none;
     stroke: #777;
@@ -5,8 +10,8 @@
 }
 
 .axis text {
-    font-family: Lato;
-    font-size: 13px;
+    font-family: Tahoma;
+    font-size: 10px;
 }
 
 /* Green */
@@ -30,7 +35,7 @@
 /* Red */
 .out4 {
     fill: #ff1d0d;
-    stroke-width: 0;
+    stroke-width: 10;
 }
 
 /* Belize Hole */

@@ -5,10 +5,16 @@
         top: 20,
         right: 20,
         bottom: 30,
-        left: 50
+        left: 50,
+        xAxisLabel: 20,
+        yLabel: 20,
+        yAxisLabel: 30
     };
-    var WIDTH = 2000 - MARGINS.left - MARGINS.right;
+    var WIDTH = 1000 - MARGINS.left - MARGINS.right;
     var HEIGHT = 400 - MARGINS.top - MARGINS.bottom;
+
+    var xAxisLabel = "Time (seconds)";
+    var yAxisLabel = "Sound Type";
 
     var svg = d3.select("body").append("svg")
         .attr("width", WIDTH + MARGINS.left + MARGINS.right)
@@ -34,13 +40,35 @@
             return d.sound;
         });
 
-        var xScale = d3.scale.linear().range([MARGINS.left, WIDTH - MARGINS.right]).domain([minTime, maxTime]);
-        var yScale = d3.scale.linear().range([HEIGHT - MARGINS.top, MARGINS.bottom]).domain([0, maxSound]);
+        var xScale = d3.scale.linear().domain([minTime, maxTime]).range([MARGINS.left + MARGINS.yAxisLabel + MARGINS.yLabel, WIDTH - MARGINS.right]);
+        // NOTE: Need to subtract 0.5 to align data with uppermost tick mark
+        var yScale = d3.scale.linear().domain([0, maxSound]).range([HEIGHT - MARGINS.top, MARGINS.bottom]);
+
+        // FIX: Use Sound
+        var yAxisVals = ["", "None", "1 Person", "2 People", "Other"];
+        var yAxisScale = d3.scale.ordinal().domain(yAxisVals).rangePoints([HEIGHT - MARGINS.top, MARGINS.bottom]);
+
         var xAxis = d3.svg.axis()
             .scale(xScale);
         var yAxis = d3.svg.axis()
-            .scale(yScale)
+            .scale(yAxisScale)
+            .outerTickSize(0)
             .orient("left");
+
+        // X-Axis Label
+        svg.append("text")
+            .attr("class", "axis-label")
+            .attr("x", WIDTH / 2)
+            .attr("y", HEIGHT + MARGINS.xAxisLabel)
+            .style("text-anchor", "middle")
+            .text(xAxisLabel);
+
+        // Y-Axis Label
+        svg.append("text")
+            .attr("transform", "translate(20, " + (HEIGHT / 2 - MARGINS.bottom) + ") rotate(-90)")
+            .attr("class", "axis-label")
+            .style("text-anchor", "middle")
+            .text(yAxisLabel);
 
         svg.append("g")
             .attr("class", "x axis")
@@ -48,8 +76,9 @@
             .call(xAxis);
         svg.append("g")
             .attr("class", "y axis")
-            .attr("transform", "translate(" + (MARGINS.left) + ",0)")
+            .attr("transform", "translate(" + (MARGINS.left + MARGINS.yAxisLabel + MARGINS.yLabel) + ",0)")
             .call(yAxis);
+
         //================================================================================
         // 1st Graph (Outline)
         //================================================================================
@@ -61,31 +90,15 @@
                 return yScale(d.sound);
             });
 
-        svg.append('path')
+        //================================================================================
+        // 1st Graph Outline
+        //================================================================================
+        
+        /*svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
             .attr('stroke-width', 2)
-            .attr('fill', 'none');
-
-        //================================================================================
-        // 1st Graph Shade Sanity Test
-        //================================================================================
-        /*
-        svg.datum(data)
-        var area = d3.svg.area()
-            .x(function(d) {
-                return xScale(d.time);
-            })
-            .y1(function(d) {
-                return yScale(d.sound);
-            });
-        svg.append("path")
-            .attr("fill", "purple")
-            .attr("clip-path", "url(#clip-above)")
-            .attr("d", area.y0(function(d) {
-                return HEIGHT - MARGINS.bottom;
-            }));
-        */
+            .attr('fill', 'none');*/
 
         //================================================================================
         // 2nd Graph (Color)
