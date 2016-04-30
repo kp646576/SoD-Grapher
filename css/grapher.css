@@ -1,0 +1,52 @@
+.axis path {
+    fill: none;
+    stroke: #777;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: Lato;
+    font-size: 13px;
+}
+
+/* Green */
+.out1 {
+    fill: #27ae60;
+    stroke-width: 0;
+}
+
+/* Blue */
+.out2 {
+    fill: #2d0dff;
+    stroke-width: 0;
+}
+
+/* Yellow */
+.out3 {
+    fill: #dfff0d;
+    stroke-width: 0;
+}
+
+/* Red */
+.out4 {
+    fill: #ff1d0d;
+    stroke-width: 0;
+}
+
+/* Belize Hole */
+.flat2 {
+    fill: #2980b9;
+    stroke-width: 0;
+}
+
+/* Sunflower */
+.flat3 {
+    fill: #f1c40f;
+    stroke-width: 0;
+}
+
+/* Pomegranate */
+.flat4 {
+    fill: #c0392b;
+    stroke-width: 0;
+}
