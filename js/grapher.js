@@ -1,5 +1,14 @@
 (function() {
 
+    // Data Files
+    var DATA = {
+        g1: "../data/sound.csv",
+        o1: "../data/out1.csv",
+        o2: "../data/out2.csv",
+        o3: "../data/out3.csv",
+        o4: "../data/out4.csv"
+    };
+
     // Graph Initializations
     var MARGINS = {
         top: 20,
@@ -13,8 +22,11 @@
     var WIDTH = 1000 - MARGINS.left - MARGINS.right;
     var HEIGHT = 400 - MARGINS.top - MARGINS.bottom;
 
-    var xAxisLabel = "Time (seconds)";
-    var yAxisLabel = "Sound Type";
+    var GRAPH = {
+        title: "[TITLE]",
+        xAxisLabel: "Time (seconds)",
+        yAxisLabel: "Sound Type"
+    };
 
     var svg = d3.select("body").append("svg")
         .attr("width", WIDTH + MARGINS.left + MARGINS.right)
@@ -23,7 +35,7 @@
     //================================================================================
     // Load 1st Graph Data
     //================================================================================
-    d3.csv("../data/sound.csv", function(d) {
+    d3.csv(DATA.g1, function(d) {
         return {
             time: +d.time,
             sound: +d.sound
@@ -55,20 +67,31 @@
             .outerTickSize(0)
             .orient("left");
 
+        // Graph Title
+        svg.append("text")
+            .attr("class", "axis-label")
+            // FIX: WIDTH margins & HEIGHT
+            .attr("x", WIDTH / 2 + 50)
+            .attr("y", MARGINS.top / 2 + 10)
+            .attr("text-anchor", "middle")
+            .style("font-size", "16px")
+            .text(GRAPH.title);
+
         // X-Axis Label
         svg.append("text")
             .attr("class", "axis-label")
-            .attr("x", WIDTH / 2)
+            // FIX: WIDTH margins 
+            .attr("x", WIDTH / 2 + 50)
             .attr("y", HEIGHT + MARGINS.xAxisLabel)
             .style("text-anchor", "middle")
-            .text(xAxisLabel);
+            .text(GRAPH.xAxisLabel);
 
         // Y-Axis Label
         svg.append("text")
             .attr("transform", "translate(20, " + (HEIGHT / 2 - MARGINS.bottom) + ") rotate(-90)")
             .attr("class", "axis-label")
             .style("text-anchor", "middle")
-            .text(yAxisLabel);
+            .text(GRAPH.yAxisLabel);
 
         svg.append("g")
             .attr("class", "x axis")
@@ -93,7 +116,7 @@
         //================================================================================
         // 1st Graph Outline
         //================================================================================
-        
+
         /*svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
@@ -133,10 +156,10 @@
             });
         }
 
-        shade("../data/out1.csv", "out1");
-        shade("../data/out2.csv", "flat2");
-        shade("../data/out3.csv", "flat3");
-        shade("../data/out4.csv", "flat4");
+        shade(DATA.o1, "out1");
+        shade(DATA.o2, "flat2");
+        shade(DATA.o3, "flat3");
+        shade(DATA.o4, "flat4");
 
     });
 })();
