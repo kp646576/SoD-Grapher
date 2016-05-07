@@ -14,6 +14,11 @@
     font-size: 10px;
 }
 
+.legend {
+    font-family: Tahoma;
+    font-size: 10px;
+}
+
 /* Green */
 .out1 {
     fill: #27ae60;

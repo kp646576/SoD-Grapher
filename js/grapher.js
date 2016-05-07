@@ -2,8 +2,8 @@
 
     // Data Files
     var DATA = {
-        g1: "../data/sound.csv",
-        o1: "../data/out1.csv",
+        g1: "../data/PRESTINE/sound-vanilla.csv",
+        o1: "../data/PRESTINE/original.csv",
         o2: "../data/out2.csv",
         o3: "../data/out3.csv",
         o4: "../data/out4.csv"
@@ -17,7 +17,7 @@
         left: 50,
         xAxisLabel: 20,
         yLabel: 20,
-        yAxisLabel: 30
+        yAxisLabel: 60
     };
     var WIDTH = 1000 - MARGINS.left - MARGINS.right;
     var HEIGHT = 400 - MARGINS.top - MARGINS.bottom;
@@ -41,7 +41,7 @@
             sound: +d.sound
         };
     }, function(error, data) {
-
+        svg.datum(data);
         // Initializations
         var minTime = data[0].time;
         var maxTime = data[data.length - 1].time;
@@ -67,6 +67,11 @@
             .outerTickSize(0)
             .orient("left");
 
+        // y index of graph for given x
+        var yIdx = d3.bisector(function(d) {
+            return d.time;
+        }).left;
+
         // Graph Title
         svg.append("text")
             .attr("class", "axis-label")
@@ -88,7 +93,7 @@
 
         // Y-Axis Label
         svg.append("text")
-            .attr("transform", "translate(20, " + (HEIGHT / 2 - MARGINS.bottom) + ") rotate(-90)")
+            .attr("transform", "translate(60, " + (HEIGHT / 2 - MARGINS.bottom) + ") rotate(-90)")
             .attr("class", "axis-label")
             .style("text-anchor", "middle")
             .text(GRAPH.yAxisLabel);
@@ -102,6 +107,32 @@
             .attr("transform", "translate(" + (MARGINS.left + MARGINS.yAxisLabel + MARGINS.yLabel) + ",0)")
             .call(yAxis);
 
+        var legend = svg.selectAll(".legend")
+            .data(["Eye", "Face", "Monitor", "Other"])
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function(d, i) {
+                return "translate(0," + i * 20 + ")";
+            });
+
+        var color = d3.scale.ordinal()
+            .range(["#27ae60", "#2980b9", "#f1c40f", "#c0392b"]);
+
+        legend.append("rect")
+            .attr("x", WIDTH + 20)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", color);
+
+        legend.append("text")
+            .attr("x", WIDTH + 10)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text(function(d) {
+                return d;
+            });
+
         //================================================================================
         // 1st Graph (Outline)
         //================================================================================
@@ -111,17 +142,16 @@
             })
             .y(function(d) {
                 return yScale(d.sound);
-            });
+            })
+            // Create step-wise graph
+            .interpolate('step-after');
 
-        //================================================================================
-        // 1st Graph Outline
-        //================================================================================
-
-        /*svg.append('path')
+        // Draw Outline
+        svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
-            .attr('stroke-width', 2)
-            .attr('fill', 'none');*/
+            .attr('stroke-width', 1.5)
+            .attr('fill', 'none');
 
         //================================================================================
         // 2nd Graph (Color)
@@ -134,8 +164,8 @@
                     sound: +d.sound,
                     color: +d.color
                 };
-            }, function(error, data) {
-                svg.datum(data);
+            }, function(error, data2) {
+                svg.datum(data2);
                 var area = d3.svg.area()
                     // Needed to abruptly end shading
                     .defined(function(d) {
@@ -145,21 +175,53 @@
                         return xScale(d.time);
                     })
                     .y1(function(d) {
-                        return yScale(d.sound);
-                    });
+                        //console.log(d.time);
+                        //console.log(data[yIdx(data, d.time) - 1].sound);
+                        var idx = yIdx(data, d.time);
+                        // Need to floor index 
+                        if (d.time > minTime)
+                            idx -= 1;
+                        // Important to use data from 1st graph
+                        return yScale(data[idx].sound);
+                    })
+                    .interpolate("step-before");
 
+                // Color gradient
+                var grad = svg.append("defs")
+                    .append("linearGradient")
+                    .attr("id", "grad");
+
+                function colors(n) {
+                    if (n == 1)
+                        return  "#27ae60"
+                    else if (n == 2)
+                        return "#2980b9"
+                    else if (n == 3)
+                        return "#f1c40f"
+                    else 
+                        return "#c0392b"
+                }
+
+                // Setting up where to stop colors (need to use stop/start of next color to get sharp contrasts versus blur)
+                // Do not have to worry about shading last value (will use last value until the end)
+                for (var i = 0; i < data2.length - 1; i++) {
+                    console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
+                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime) ).attr("stop-color", colors(data2[i].color));
+                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime) ).attr("stop-color", colors(data2[i+1].color));
+                }
+
+                // Shade in 
                 svg.append("path")
-                    .attr("class", color)
-                    .attr("d", area.y0(function(d) {
-                        return HEIGHT - MARGINS.bottom;
-                    }));
+                .style("fill", "url(#grad)")
+                .attr("d", area.y0(function(d) {
+                    return HEIGHT - MARGINS.bottom;
+                }));
+
             });
         }
-
         shade(DATA.o1, "out1");
-        shade(DATA.o2, "flat2");
-        shade(DATA.o3, "flat3");
-        shade(DATA.o4, "flat4");
-
+        //shade(DATA.o2, "flat2");
+        //shade(DATA.o3, "flat3");
+        //shade(DATA.o4, "flat4");
     });
 })();
