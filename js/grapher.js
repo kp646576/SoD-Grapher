@@ -2,8 +2,8 @@
 
     // Data Files
     var DATA = {
-        g1: "../data/PRESTINE/sound-vanilla.csv",
-        o1: "../data/PRESTINE/original.csv",
+        g1: "../data/PRESTINE/talking.csv",
+        o1: "../data/PRESTINE/color.csv",
         o2: "../data/out2.csv",
         o3: "../data/out3.csv",
         o4: "../data/out4.csv"
@@ -23,12 +23,12 @@
     var HEIGHT = 400 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
-        title: "[TITLE]",
+        title: "Stages of Distraction",
         xAxisLabel: "Time (seconds)",
-        yAxisLabel: "Sound Type"
+        yAxisLabel: "" //"Sound Type"
     };
 
-    var svg = d3.select("body").append("svg")
+    var svg = d3.select("#svg").append("svg")
         .attr("width", WIDTH + MARGINS.left + MARGINS.right)
         .attr("height", HEIGHT + MARGINS.top + MARGINS.bottom);
 
@@ -57,7 +57,7 @@
         var yScale = d3.scale.linear().domain([0, maxSound]).range([HEIGHT - MARGINS.top, MARGINS.bottom]);
 
         // FIX: Use Sound
-        var yAxisVals = ["", "None", "1 Person", "2 People", "Other"];
+        var yAxisVals = ["", "Silent", "1 Typer", "1 Speaker", "1 Speaker & Typer", "2 Speakers", "2 Speakers & 1 Typer"];
         var yAxisScale = d3.scale.ordinal().domain(yAxisVals).rangePoints([HEIGHT - MARGINS.top, MARGINS.bottom]);
 
         var xAxis = d3.svg.axis()
@@ -108,7 +108,7 @@
             .call(yAxis);
 
         var legend = svg.selectAll(".legend")
-            .data(["Eye", "Face", "Monitor", "Other"])
+            .data(["Other", "Monitor", "Keyboard", "Face"])
             .enter().append("g")
             .attr("class", "legend")
             .attr("transform", function(d, i) {
@@ -147,11 +147,11 @@
             .interpolate('step-after');
 
         // Draw Outline
-        svg.append('path')
+        /* svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
             .attr('stroke-width', 1.5)
-            .attr('fill', 'none');
+            .attr('fill', 'none'); */
 
         //================================================================================
         // 2nd Graph (Color)
@@ -165,26 +165,22 @@
                     color: +d.color
                 };
             }, function(error, data2) {
-                svg.datum(data2);
+
+                // Use data from first graph
+                svg.datum(data);
                 var area = d3.svg.area()
-                    // Needed to abruptly end shading
+                    // Used for holes in data
                     .defined(function(d) {
-                        return !isNaN(d.sound);
+                        return !isNaN(d.time);
                     })
                     .x(function(d) {
                         return xScale(d.time);
                     })
                     .y1(function(d) {
-                        //console.log(d.time);
-                        //console.log(data[yIdx(data, d.time) - 1].sound);
-                        var idx = yIdx(data, d.time);
-                        // Need to floor index 
-                        if (d.time > minTime)
-                            idx -= 1;
                         // Important to use data from 1st graph
-                        return yScale(data[idx].sound);
+                        return yScale(d.sound);
                     })
-                    .interpolate("step-before");
+                    .interpolate("step-after");
 
                 // Color gradient
                 var grad = svg.append("defs")
@@ -193,29 +189,30 @@
 
                 function colors(n) {
                     if (n == 1)
-                        return  "#27ae60"
+                        return "#27ae60"
                     else if (n == 2)
                         return "#2980b9"
                     else if (n == 3)
                         return "#f1c40f"
-                    else 
+                    else
                         return "#c0392b"
                 }
 
                 // Setting up where to stop colors (need to use stop/start of next color to get sharp contrasts versus blur)
                 // Do not have to worry about shading last value (will use last value until the end)
+                // Use data from second graph
                 for (var i = 0; i < data2.length - 1; i++) {
-                    console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
-                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime) ).attr("stop-color", colors(data2[i].color));
-                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime) ).attr("stop-color", colors(data2[i+1].color));
+                    //console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
+                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
+                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i + 1].color));
                 }
 
-                // Shade in 
+                // Shade 
                 svg.append("path")
-                .style("fill", "url(#grad)")
-                .attr("d", area.y0(function(d) {
-                    return HEIGHT - MARGINS.bottom;
-                }));
+                    .style("fill", "url(#grad)")
+                    .attr("d", area.y0(function(d) {
+                        return HEIGHT - MARGINS.bottom;
+                    }));
 
             });
         }
@@ -224,4 +221,38 @@
         //shade(DATA.o3, "flat3");
         //shade(DATA.o4, "flat4");
     });
+
+    // Export/save graph
+    d3.select("#save").on("click", function() {
+        var html = d3.select("svg")
+            .attr("version", 1.1)
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .node().parentNode.innerHTML;
+
+        var imgsrc = 'data:image/svg+xml;base64,' + btoa(html);
+        var img = '<img src="' + imgsrc + '">';
+        d3.select("#svgdataurl").html(img);
+
+
+        var canvas = document.querySelector("canvas"),
+            context = canvas.getContext("2d");
+
+        var image = new Image;
+        image.src = imgsrc;
+        image.onload = function() {
+            context.drawImage(image, 0, 0);
+
+            var canvasdata = canvas.toDataURL("image/png");
+
+            var pngimg = '<img src="' + canvasdata + '">';
+            d3.select("#pngdataurl").html(pngimg);
+
+            var a = document.createElement("a");
+            a.download = "sample.png";
+            a.href = canvasdata;
+            a.click();
+        };
+
+    });
+
 })();
