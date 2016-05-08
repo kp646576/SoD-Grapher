@@ -1,0 +1,1 @@
+Fix issue with setting max domain from importing data

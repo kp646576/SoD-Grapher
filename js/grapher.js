@@ -3,10 +3,7 @@
     // Data Files
     var DATA = {
         g1: "../data/PRESTINE/talking.csv",
-        o1: "../data/PRESTINE/color.csv",
-        o2: "../data/out2.csv",
-        o3: "../data/out3.csv",
-        o4: "../data/out4.csv"
+        g2: "../data/PRESTINE/color.csv"
     };
 
     // Graph Initializations
@@ -19,8 +16,8 @@
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 1000 - MARGINS.left - MARGINS.right;
-    var HEIGHT = 400 - MARGINS.top - MARGINS.bottom;
+    var WIDTH = 4500 - MARGINS.left - MARGINS.right;
+    var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
         title: "Stages of Distraction",
@@ -44,7 +41,7 @@
         svg.datum(data);
         // Initializations
         var minTime = data[0].time;
-        var maxTime = data[data.length - 1].time;
+        var maxTime = 300;//data[data.length - 1].time;
         var minSound = d3.min(data, function(d) {
             return d.sound;
         });
@@ -79,7 +76,6 @@
             .attr("x", WIDTH / 2 + 50)
             .attr("y", MARGINS.top / 2 + 10)
             .attr("text-anchor", "middle")
-            .style("font-size", "16px")
             .text(GRAPH.title);
 
         // X-Axis Label
@@ -157,7 +153,7 @@
         // 2nd Graph (Color)
         //================================================================================
 
-        function shade(filePath, color) {
+        function shade(filePath) {
             d3.csv(filePath, function(d) {
                 return {
                     time: +d.time,
@@ -201,11 +197,14 @@
                 // Setting up where to stop colors (need to use stop/start of next color to get sharp contrasts versus blur)
                 // Do not have to worry about shading last value (will use last value until the end)
                 // Use data from second graph
-                for (var i = 0; i < data2.length - 1; i++) {
+                grad.append("stop").attr("offset", 0).attr("stop-color", colors(data2[0].color));
+                for (var i = 1; i < data2.length; i++) {
                     //console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
+                    console.log(data2[i].color);
+                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color));
                     grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
-                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i + 1].color));
                 }
+               
 
                 // Shade 
                 svg.append("path")
@@ -216,10 +215,9 @@
 
             });
         }
-        shade(DATA.o1, "out1");
-        //shade(DATA.o2, "flat2");
-        //shade(DATA.o3, "flat3");
-        //shade(DATA.o4, "flat4");
+
+        // Run shade
+        shade(DATA.g2);
     });
 
     // Export/save graph
