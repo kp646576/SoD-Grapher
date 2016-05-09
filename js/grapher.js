@@ -2,8 +2,12 @@
 
     // Data Files
     var DATA = {
-        g1: "../data/PRESTINE/talking.csv",
-        g2: "../data/PRESTINE/color.csv"
+        g1: "../data/C2/C2_000_300/talking.csv",
+        g2: "../data/C2/C2_000_300/color.csv"
+        //g1: "../data/C1/C1_120_240/talking.csv",
+        //g2: "../data/C1/C1_120_240/color.csv"
+        //g1: "../data/C1/C1_120_300/talking.csv",
+        //g2: "../data/C1/C1_120_300/color.csv"
     };
 
     // Graph Initializations
@@ -16,8 +20,8 @@
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 4500 - MARGINS.left - MARGINS.right;
-    var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
+    var WIDTH = 1000 - MARGINS.left - MARGINS.right;
+    var HEIGHT = 300 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
         title: "Stages of Distraction",
@@ -41,7 +45,7 @@
         svg.datum(data);
         // Initializations
         var minTime = data[0].time;
-        var maxTime = 300;//data[data.length - 1].time;
+        var maxTime = data[data.length - 1].time;
         var minSound = d3.min(data, function(d) {
             return d.sound;
         });
@@ -49,6 +53,7 @@
             return d.sound;
         });
 
+        // Math.min(d1minTime, d2minTime) Math.max(d1maxTime, d2maxTime)
         var xScale = d3.scale.linear().domain([minTime, maxTime]).range([MARGINS.left + MARGINS.yAxisLabel + MARGINS.yLabel, WIDTH - MARGINS.right]);
         // NOTE: Need to subtract 0.5 to align data with uppermost tick mark
         var yScale = d3.scale.linear().domain([0, maxSound]).range([HEIGHT - MARGINS.top, MARGINS.bottom]);
@@ -143,21 +148,23 @@
             .interpolate('step-after');
 
         // Draw Outline
-        /* svg.append('path')
+        svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
             .attr('stroke-width', 1.5)
-            .attr('fill', 'none'); */
+            .attr('fill', 'none');
 
         //================================================================================
         // 2nd Graph (Color)
         //================================================================================
 
+        var grad;
+
         function shade(filePath) {
             d3.csv(filePath, function(d) {
                 return {
                     time: +d.time,
-                    sound: +d.sound,
+                    //sound: +d.sound,
                     color: +d.color
                 };
             }, function(error, data2) {
@@ -179,7 +186,7 @@
                     .interpolate("step-after");
 
                 // Color gradient
-                var grad = svg.append("defs")
+                grad = svg.append("defs")
                     .append("linearGradient")
                     .attr("id", "grad");
 
@@ -197,14 +204,16 @@
                 // Setting up where to stop colors (need to use stop/start of next color to get sharp contrasts versus blur)
                 // Do not have to worry about shading last value (will use last value until the end)
                 // Use data from second graph
-                grad.append("stop").attr("offset", 0).attr("stop-color", colors(data2[0].color));
+                // Hack needed to change color using gradient to have abrupt color changes
+                var start = [];
+                var stop = [];
+                start.push(grad.append("stop").attr("offset", 0).attr("stop-color", colors(data2[0].color)));
                 for (var i = 1; i < data2.length; i++) {
                     //console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
-                    console.log(data2[i].color);
-                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color));
-                    grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
+                    //console.log(data2[i].color);
+                    stop.push(grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color)));
+                    start.push(grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color)));
                 }
-               
 
                 // Shade 
                 svg.append("path")
@@ -213,15 +222,48 @@
                         return HEIGHT - MARGINS.bottom;
                     }));
 
+                // Filter
+                function filterColor(fColor, on) {
+                    var prevColor;
+                    var curColor;
+                    on && data2[0].color != fColor ? start[0].transition().attr("stop-color", "white") : start[0].transition().attr("stop-color", colors(data2[0].color));
+                    for (var i = 1; i < data2.length; i++) {
+                        // Shade filterColor or else white if filter option is on
+                        prevColor = on && data2[i - 1].color != fColor ? "white" : colors(data2[i - 1].color);
+                        curColor = on && data2[i].color != fColor ? "white" : colors(data2[i].color);
+
+                        stop[i - 1].transition().attr("stop-color", prevColor);
+                        start[i].transition().attr("stop-color", curColor);
+                    }
+                }
+
+                d3.select("#other").on("click", function() {
+                    filterColor(1, true);
+                });
+                d3.select("#monitor").on("click", function() {
+                    filterColor(2, true);
+                });
+                d3.select("#keyboard").on("click", function() {
+                    filterColor(3, true);
+                });
+                d3.select("#face").on("click", function() {
+                    filterColor(4, true);
+                });
+                d3.select("#all").on("click", function() {
+                    filterColor(0, false);
+                });
+
             });
+            // End Data2 Function
         }
+        // End Shade
 
         // Run shade
         shade(DATA.g2);
     });
 
     // Export/save graph
-    d3.select("#save").on("click", function() {
+    /*d3.select("#save").on("click", function() {
         var html = d3.select("svg")
             .attr("version", 1.1)
             .attr("xmlns", "http://www.w3.org/2000/svg")
@@ -246,11 +288,11 @@
             d3.select("#pngdataurl").html(pngimg);
 
             var a = document.createElement("a");
-            a.download = "sample.png";
-            a.href = canvasdata;
-            a.click();
+            //a.download = "sample.png";
+            //a.href = canvasdata;
+            //a.click();
         };
 
-    });
+    });*/
 
 })();

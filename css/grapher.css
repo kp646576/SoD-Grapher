@@ -1,6 +1,6 @@
 .axis-label{
     font-family: Arial;
-    font-size: 50px;
+    font-size: 15px;
 }
 
 .axis path {
@@ -10,13 +10,13 @@
 }
 
 .axis text {
-    font-family: Tahoma;
-    font-size: 50px;
+    font-family: Arial;
+    font-size: 12px;
 }
 
 .legend {
-    font-family: Tahoma;
-    font-size: 50px;
+    font-family: Arial;
+    font-size: 12px;
 }
 
 /* Green */

@@ -4,16 +4,27 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="css/grapher.css">
+    <style>
+    div {
+        font-family: Arial;
+    }
+    </style>
 </head>
 
 <body>
     <div id="svg"></div>
-    <button id="save">Save as Image</button>
+    <div>Filters</div>
+    <button id="other">Other</button>
+    <button id="monitor">Monitor</button>
+    <button id="keyboard">Keyboard</button>
+    <button id="face">Face</button>
+    <button id="all">Show All</button>
+    <!-- <button id="save">Save as Image</button>
     <h2>SVG dataurl:</h2>
     <div id="svgdataurl"></div>
     <h2>SVG converted to PNG dataurl via HTML5 CANVAS:</h2>
     <div id="pngdataurl"></div>
-    <canvas width="960" height="500" style="display:none"></canvas>
+    <canvas width="960" height="500" style="display:none"></canvas> -->
     <script src="js/d3.js"></script>
     <script src="js/d3.tip.js"></script>
     <script src="js/grapher.js"></script>
