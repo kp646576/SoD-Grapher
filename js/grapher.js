@@ -270,7 +270,7 @@
                         // Begin Boundary
                         var boundaryColor;
                         // Need to subtract first value off to get correct color
-                        if (data[bisect(data, data2[i - 1].time) <= 0 ? 0 : bisect(data, data2[i - 1].time) - 1].sound == 0.5)
+                        if (data[bisect(data, data2[i - 1].time) <= 0 ? 0 : bisect(data, data2[i - 1].time) - 1].sound == fSound)
                                 boundaryColor = colors(data2[i - 1].color);
                         else
                             boundaryColor = "white";
@@ -285,7 +285,7 @@
 
                         // Filtered data1 (empty data)
                         if (range.length > 0) {
-                            var startColor = range[0].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+                            var startColor = range[0].sound != fSound ? "white" : colors(data2[i - 1].color);
                                                         if (range[0].time > 70 && range[0].time < 80) {
                             console.log("range[0].time: " + range[0].time);
                             console.log("boundaryColor: " + boundaryColor);
@@ -305,8 +305,8 @@
                         var curColor = startColor;
                         for (var j = 1; j < range.length; j++) {
                             inside = true;
-                            prevColor = range[j - 1].sound != 0.5 ? "white" : colors(data2[i - 1].color);
-                            curColor = range[j].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+                            prevColor = range[j - 1].sound != fSound ? "white" : colors(data2[i - 1].color);
+                            curColor = range[j].sound != fSound ? "white" : colors(data2[i - 1].color);
 
                             //console.log("range[" + j.toString() + "].time: " + range[j].time);
                             //console.log("range[j] color: " + curColor);
@@ -334,12 +334,12 @@
                         console.log("ALL data2[i].time: " + data2[i].time);
                         console.log("ALL BISECT: " + data[bisect(data, data2[i].time) - 1].sound);
 
-                        if (!inside && data[bisect(data, data2[i].time) - 1].sound == 0.5) {
+                        if (!inside && data[bisect(data, data2[i].time) - 1].sound == fSound) {
                             gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color));
                         } else {
                             gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
                         }
-                        if (data[bisect(data, data2[i].time) - 1].sound == 0.5) {
+                        if (data[bisect(data, data2[i].time) - 1].sound == fSound) {
                             if (data[bisect(data, data2[i].time) - 1].time > 70 && data[bisect(data, data2[i].time) - 1].time < 80) {
                             console.log("data2[i].time: " + data2[i].time);
                             console.log("data[bisect(data, data2[i].time)].time: " + data[bisect(data, data2[i].time) - 1].time.toString());
@@ -404,6 +404,22 @@
                 d3.select("#all").on("click", function() {
                     filterColor(0, false);
                     outline.style("opacity", 0);
+                });
+                d3.select("#two-sp-one-ty").on("click", function() {
+                    filterSound(5);
+                    outline.style("opacity", 1);
+                });
+                d3.select("#two-sp").on("click", function() {
+                    filterSound(4);
+                    outline.style("opacity", 1);
+                });
+                d3.select("#one-sp-one-ty").on("click", function() {
+                    filterSound(3);
+                    outline.style("opacity", 1);
+                });
+                d3.select("#one-sp").on("click", function() {
+                    filterSound(2);
+                    outline.style("opacity", 1);
                 });
                 d3.select("#one-ty").on("click", function() {
                     filterSound(1);
