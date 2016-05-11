@@ -4,10 +4,10 @@
     var DATA = {
         g1: "../data/C2/C2_000_300/talking.csv",
         g2: "../data/C2/C2_000_300/color.csv"
-        //g1: "../data/C1/C1_120_240/talking.csv",
-        //g2: "../data/C1/C1_120_240/color.csv"
-        //g1: "../data/C1/C1_120_300/talking.csv",
-        //g2: "../data/C1/C1_120_300/color.csv"
+            //g1: "../data/C1/C1_120_240/talking.csv",
+            //g2: "../data/C1/C1_120_240/color.csv"
+            //g1: "../data/C1/C1_120_300/talking.csv",
+            //g2: "../data/C1/C1_120_300/color.csv"
     };
 
     // Graph Initializations
@@ -148,11 +148,13 @@
             .interpolate('step-after');
 
         // Draw Outline
-        svg.append('path')
+        var outline = svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
             .attr('stroke-width', 1.5)
-            .attr('fill', 'none');
+            // Need to no fill black
+            .attr('fill', 'none')
+            .style("opacity", 0);
 
         //================================================================================
         // 2nd Graph (Color)
@@ -216,7 +218,7 @@
                 }
 
                 // Shade 
-                svg.append("path")
+                var shadeGraph = svg.append("path")
                     .style("fill", "url(#grad)")
                     .attr("d", area.y0(function(d) {
                         return HEIGHT - MARGINS.bottom;
@@ -237,20 +239,150 @@
                     }
                 }
 
+                var bisect = d3.bisector(function(d) {
+                    return d.time;
+                }).left;
+                //console.log(bisect(data2, 5));
+                //console.log(data[1].time);
+
+                function filterSound(fSound) {
+                    //shadeGraph.data();
+                    //console.log(data.filter(function(d) { return d.time < 50;}));
+
+                    var gradSound = svg.append("defs")
+                        .append("linearGradient")
+                        .attr("id", "gradSound");
+
+
+                    //var range = data.filter(function(d) { return d.sound == 0.5});
+
+
+
+
+
+                    for (var i = 1; i < data2.length; i++) {
+                        // data less than the the border amount |    before the change|
+                        var range = data.filter(function(d) {
+                            return d.time < data2[i].time && d.time >= data2[i - 1].time;
+                        });
+
+                        // Begin Boundary
+                        var boundaryColor;
+                        // Need to subtract first value off to get correct color
+                        if (data[bisect(data, data2[i - 1].time) <= 0 ? 0 : bisect(data, data2[i - 1].time) - 1].sound == 0.5)
+                            boundaryColor = colors(data2[i - 1].color);
+                        else
+                            boundaryColor = "white";
+
+                        //gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i - 1].time) / (maxTime - minTime)).attr("stop-color", boundaryColor);
+
+
+
+
+
+
+                        // Filtered data1
+                        if (range.length > 0) {
+                            console.log("range[0].time: " + range[0].time);
+                            console.log("range[j] color: " + data2[i - 1].color);
+                            var startColor = range[0].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+                            // Stop
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[0].time) / (maxTime - minTime)).attr("stop-color", boundaryColor);
+                            // Start
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[0].time) / (maxTime - minTime)).attr("stop-color", startColor);
+                        }
+
+                        // Everything in this range will be either data2[i-1] or white
+                        var prevColor, curColor;
+                        for (var j = 1; j < range.length; j++) {
+                            prevColor = range[j - 1].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+                            curColor = range[j].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+
+                            //console.log("range[" + j.toString() + "].time: " + range[j].time);
+                            //console.log("range[j] color: " + data2[i - 1].color);
+                            // Stop
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", prevColor);
+                            // Start
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", curColor);
+                        }
+
+                        // Last range color cut off at start of next d2[i] value/ end value
+                        gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", curColor);
+
+                        //console.log("data2[i].time: " + data2[i].time.toString());
+                        // End boundary
+                        // Need to subtract 1 from the index to get correct value
+                        // Next color data value (can potentially be the same color)
+                        if (data[bisect(data, data2[i].time) - 1].sound == 0.5) {
+                            //console.log("data[bisect(data, data2[i].time)].time: " + data[bisect(data, data2[i].time)].time.toString());
+                            //console.log("color: " +data2[i - 1].color.toString());
+                            // Need to use next value so "i"
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
+                        } else {
+                            // Set value to white if it's not 0.5 (don't care about the color)
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
+                        }
+
+
+                    }
+
+                    //console.log(data[bisect(data, 1) == 0 ? 0 : bisect(data, 1) ].sound);
+                    shadeGraph.style("fill", "url(#gradSound)");
+                    //console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
+                    //console.log(data2[i].color);
+                    //gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color)));
+                    //gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color)));
+                    //}
+
+
+
+
+
+
+                    /* var prevColor;
+                     var curColor;
+                     data[0].sound != fSound ? start[0].transition().attr("stop-color", "white") : start[0].transition().attr("stop-color", colors(data2[0].color));
+                     for (var i = 1; i < data2.length; i++) {
+                         // Shade filterColor or else white if filter option is on
+                         prevColor = data[i - 1].sound != fSound ? "white" : colors(data2[i - 1].color);
+                         curColor = data[i].sound != fSound ? "white" : colors(data2[i].color);
+
+                         stop[i - 1].transition().attr("stop-color", prevColor);
+                         start[i].transition().attr("stop-color", curColor);
+                     }
+
+
+
+                     shadeGraph.style("fill", "url(#gradSound)")*/
+                }
+
                 d3.select("#other").on("click", function() {
                     filterColor(1, true);
+                    outline.style("opacity", 1);
                 });
                 d3.select("#monitor").on("click", function() {
                     filterColor(2, true);
+                    outline.style("opacity", 1);
                 });
                 d3.select("#keyboard").on("click", function() {
                     filterColor(3, true);
+                    outline.style("opacity", 1);
                 });
                 d3.select("#face").on("click", function() {
                     filterColor(4, true);
+                    outline.style("opacity", 1);
                 });
                 d3.select("#all").on("click", function() {
                     filterColor(0, false);
+                    outline.style("opacity", 0);
+                });
+                d3.select("#one-ty").on("click", function() {
+                    filterSound(1);
+                    outline.style("opacity", 1);
+                });
+                d3.select("#silent").on("click", function() {
+                    filterSound(0.5);
+                    outline.style("opacity", 1);
                 });
 
             });
