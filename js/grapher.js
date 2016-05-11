@@ -20,7 +20,7 @@
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 1000 - MARGINS.left - MARGINS.right;
+    var WIDTH = 2000 - MARGINS.left - MARGINS.right;
     var HEIGHT = 300 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
@@ -262,6 +262,7 @@
 
                     for (var i = 1; i < data2.length; i++) {
                         // data less than the the border amount |    before the change|
+                        var inside = false;
                         var range = data.filter(function(d) {
                             return d.time < data2[i].time && d.time >= data2[i - 1].time;
                         });
@@ -270,7 +271,7 @@
                         var boundaryColor;
                         // Need to subtract first value off to get correct color
                         if (data[bisect(data, data2[i - 1].time) <= 0 ? 0 : bisect(data, data2[i - 1].time) - 1].sound == 0.5)
-                            boundaryColor = colors(data2[i - 1].color);
+                                boundaryColor = colors(data2[i - 1].color);
                         else
                             boundaryColor = "white";
 
@@ -278,14 +279,21 @@
 
 
 
+                   
 
 
 
-                        // Filtered data1
+                        // Filtered data1 (empty data)
                         if (range.length > 0) {
-                            console.log("range[0].time: " + range[0].time);
-                            console.log("range[j] color: " + data2[i - 1].color);
                             var startColor = range[0].sound != 0.5 ? "white" : colors(data2[i - 1].color);
+                                                        if (range[0].time > 70 && range[0].time < 80) {
+                            console.log("range[0].time: " + range[0].time);
+                            console.log("boundaryColor: " + boundaryColor);
+                            console.log("range[0].sound: " + range[0].sound);
+                            console.log("range[j] color: " + data2[i - 1].color);
+                             console.log("startColor: " + startColor);
+                        }
+                           
                             // Stop
                             gradSound.append("stop").attr("offset", 1 - (maxTime - range[0].time) / (maxTime - minTime)).attr("stop-color", boundaryColor);
                             // Start
@@ -293,29 +301,50 @@
                         }
 
                         // Everything in this range will be either data2[i-1] or white
-                        var prevColor, curColor;
+                        var prevColor;
+                        var curColor = startColor;
                         for (var j = 1; j < range.length; j++) {
+                            inside = true;
                             prevColor = range[j - 1].sound != 0.5 ? "white" : colors(data2[i - 1].color);
                             curColor = range[j].sound != 0.5 ? "white" : colors(data2[i - 1].color);
 
                             //console.log("range[" + j.toString() + "].time: " + range[j].time);
-                            //console.log("range[j] color: " + data2[i - 1].color);
+                            //console.log("range[j] color: " + curColor);
                             // Stop
                             gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", prevColor);
                             // Start
                             gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", curColor);
                         }
+                        console.log("ending color: " + curColor.toString());
+                        // Last range color cut off at start of next d2[i] value/ end value (stop)
 
-                        // Last range color cut off at start of next d2[i] value/ end value
-                        gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", curColor);
+                        // Need if statement to get around empty data1 case (change only if the data1 is not empty)
+                        if (range.length > 0) {
+                            if (range[0].time > 70 && range[0].time < 80) {
+                            console.log("ending color range > 0: " + curColor.toString());
+                        }
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", curColor);
+                        }
 
                         //console.log("data2[i].time: " + data2[i].time.toString());
                         // End boundary
                         // Need to subtract 1 from the index to get correct value
                         // Next color data value (can potentially be the same color)
+                        // Start
+                        console.log("ALL data2[i].time: " + data2[i].time);
+                        console.log("ALL BISECT: " + data[bisect(data, data2[i].time) - 1].sound);
+
+                        if (!inside && data[bisect(data, data2[i].time) - 1].sound == 0.5) {
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color));
+                        } else {
+                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
+                        }
                         if (data[bisect(data, data2[i].time) - 1].sound == 0.5) {
-                            //console.log("data[bisect(data, data2[i].time)].time: " + data[bisect(data, data2[i].time)].time.toString());
-                            //console.log("color: " +data2[i - 1].color.toString());
+                            if (data[bisect(data, data2[i].time) - 1].time > 70 && data[bisect(data, data2[i].time) - 1].time < 80) {
+                            console.log("data2[i].time: " + data2[i].time);
+                            console.log("data[bisect(data, data2[i].time)].time: " + data[bisect(data, data2[i].time) - 1].time.toString());
+                            console.log("color: " +data2[i].color.toString());
+                        }
                             // Need to use next value so "i"
                             gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
                         } else {
