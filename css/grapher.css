@@ -1,6 +1,6 @@
 .axis-label{
     font-family: Arial;
-    font-size: 10px;
+    font-size: 15px;
 }
 
 .axis path {
@@ -11,7 +11,7 @@
 
 .axis text {
     font-family: Arial;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .legend {

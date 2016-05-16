@@ -1,6 +1,4 @@
-function graph(element, DATA) {
-
-
+function graph(element, DATA, title) {
 
     // Graph Initializations
     var MARGINS = {
@@ -16,11 +14,12 @@ function graph(element, DATA) {
     var HEIGHT = 300 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
-        title: "Stages of Distraction",
+        title: title,
         xAxisLabel: "Time (seconds)",
         yAxisLabel: "" //"Sound Type"
     };
 
+    var bgColor = "white";
     var svg = d3.select("#" + element).append("svg")
         .attr("width", WIDTH + MARGINS.left + MARGINS.right)
         .attr("height", HEIGHT + MARGINS.top + MARGINS.bottom);
@@ -159,13 +158,56 @@ function graph(element, DATA) {
             d3.csv(filePath, function(d) {
                 return {
                     time: +d.time,
-                    //sound: +d.sound,
                     color: +d.color
                 };
             }, function(error, data2) {
 
+                function colors(n) {
+                    if (n == 1)
+                        return "#27ae60"
+                    else if (n == 2)
+                        return "#2980b9"
+                    else if (n == 3)
+                        return "#f1c40f"
+                    else
+                        return "#c0392b"
+                }
+
+                function addColorStop(gradient, offset, color) {
+                    return gradient.append("stop")
+                        .attr("offset", 1 - (maxTime - offset) / (maxTime - minTime))
+                        .attr("stop-color", color);
+                }
+
+                function filterColor(fColor, on) {
+                    var prevColor, nextColor;
+                    for (var i = 0; i < data2.length - 1; i++) {
+                        // Shade filter color or else background color if filter option is on
+                        curColor = on && data2[i].color != fColor ? bgColor : colors(data2[i].color);
+                        nextColor = on && data2[i + 1].color != fColor ? bgColor : colors(data2[i + 1].color);
+
+                        stop[i].transition().attr("stop-color", curColor);
+                        start[i].transition().attr("stop-color", nextColor);
+                    }
+                }
+
+
                 // Use data from first graph
                 svg.datum(data);
+
+                // Color gradient
+                grad = svg.append("defs")
+                    .append("linearGradient")
+                    .attr("id", "grad" + element);
+
+                // Set up initial gradient
+                var stop = [];
+                var start = [];
+                for (var i = 1; i < data2.length; i++) {
+                    stop.push(addColorStop(grad, data2[i].time, colors(data2[i - 1].color)));
+                    start.push(addColorStop(grad, data2[i].time, colors(data2[i].color)));
+                }
+
                 var area = d3.svg.area()
                     // Used for holes in data
                     .defined(function(d) {
@@ -180,36 +222,6 @@ function graph(element, DATA) {
                     })
                     .interpolate("step-after");
 
-                // Color gradient
-                grad = svg.append("defs")
-                    .append("linearGradient")
-                    .attr("id", "grad" + element);
-
-                function colors(n) {
-                    if (n == 1)
-                        return "#27ae60"
-                    else if (n == 2)
-                        return "#2980b9"
-                    else if (n == 3)
-                        return "#f1c40f"
-                    else
-                        return "#c0392b"
-                }
-
-                // Setting up where to stop colors (need to use stop/start of next color to get sharp contrasts versus blur)
-                // Do not have to worry about shading last value (will use last value until the end)
-                // Use data from second graph
-                // Hack needed to change color using gradient to have abrupt color changes
-                var start = [];
-                var stop = [];
-                start.push(grad.append("stop").attr("offset", 0).attr("stop-color", colors(data2[0].color)));
-                for (var i = 1; i < data2.length; i++) {
-                    //console.log(1- (maxTime - data2[i].time) / (maxTime - minTime));
-                    //console.log(data2[i].color);
-                    stop.push(grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color)));
-                    start.push(grad.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color)));
-                }
-
                 // Shade 
                 var shadeGraph = svg.append("path")
                     .style("fill", "url(#grad" + element + ")")
@@ -217,20 +229,11 @@ function graph(element, DATA) {
                         return HEIGHT - MARGINS.bottom;
                     }));
 
-                // Filter
-                function filterColor(fColor, on) {
-                    var prevColor;
-                    var curColor;
-                    on && data2[0].color != fColor ? start[0].transition().attr("stop-color", "white") : start[0].transition().attr("stop-color", colors(data2[0].color));
-                    for (var i = 1; i < data2.length; i++) {
-                        // Shade filterColor or else white if filter option is on
-                        prevColor = on && data2[i - 1].color != fColor ? "white" : colors(data2[i - 1].color);
-                        curColor = on && data2[i].color != fColor ? "white" : colors(data2[i].color);
 
-                        stop[i - 1].transition().attr("stop-color", prevColor);
-                        start[i].transition().attr("stop-color", curColor);
-                    }
-                }
+
+
+
+
 
                 var bisect = d3.bisector(function(d) {
                     return d.time;
@@ -311,14 +314,7 @@ function graph(element, DATA) {
                             // Set value to white if it's not 0.5 (don't care about the color)
                             gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
                         }
-
-
                     }
-
-                    //console.log(data[bisect(data, 1) == 0 ? 0 : bisect(data, 1) ].sound);
-
-
-
                 }
 
 
@@ -386,7 +382,7 @@ function graph(element, DATA) {
             });
             // End Data2 Function
         }
-        // End Shade
+        // End shade
 
         // Run shade
         shade(DATA.g2);
@@ -430,22 +426,14 @@ function graph(element, DATA) {
 
 // Data Files
 var DATA1 = {
-    g1: "../data/1st/C2/sound_2.csv",
-    g2: "../data/1st/C2/color_2.csv"
-        //g1: "../data/C1/C1_120_240/talking.csv",
-        //g2: "../data/C1/C1_120_240/color.csv"
-        //g1: "../data/C1/C1_120_300/talking.csv",
-        //g2: "../data/C1/C1_120_300/color.csv"
+    g1: "../data/1st/C1/sound_1.csv",
+    g2: "../data/1st/C1/color_1.csv"
 };
 
 var DATA2 = {
-    g1: "../data/1st/C1/sound_1.csv",
-    g2: "../data/1st/C1/color_1.csv"
-        //g1: "../data/C1/C1_120_240/talking.csv",
-        //g2: "../data/C1/C1_120_240/color.csv"
-        //g1: "../data/C1/C1_120_300/talking.csv",
-        //g2: "../data/C1/C1_120_300/color.csv"
+    g1: "../data/1st/C2/sound_2.csv",
+    g2: "../data/1st/C2/color_2.csv"
 };
 
-graph("graph1", DATA1);
-graph("graph2", DATA2);
+graph("graph1", DATA1, "Stages of Distraction Conversation 1");
+graph("graph2", DATA2, "Stages of Distraction Conversation 2");
