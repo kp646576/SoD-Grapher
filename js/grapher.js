@@ -288,35 +288,35 @@ function graph(element, DATA, title) {
 
                     for (var i = 1; i < data2.length; i++) {
                         var data2Color = data2[i - 1].color;
-                        
+
                         // Get same color values from certain range
                         var range = data.filter(function(d) {
                             return d.time < data2[i].time && d.time >= data2[i - 1].time;
-                        });           
+                        });
 
                         // From previous color set to new color
                         var prevY2 = i > 1 ? data[bisect(data, data2[i - 1].time) - 1] : data[bisect(data, data2[i - 1].time)];
                         if (range.length > 0 && prevY2.sound != range[0].sound) {
                             gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2[i - 1].color)));
                         }
-                        
+
                         // Set contains only 1 value
                         if (range.length == 1) {
                             gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2Color)));
                         }
 
-                        console.log("start");
+
                         for (var j = 1; j < range.length; j++) {
                             if (range[j].time < 22) {
-                                console.log(range[j].time);
-                                console.log(range.length);
+                                //console.log(range[j].time);
+                                //console.log(range.length);
                             }
-                            
+
                             // Previous point
                             if (j > 1 && range[j - 2].sound != range[j - 1].sound)
                                 gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
                             gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
-                            
+
                             // Current point
                             if (range[j - 1].sound != range[j].sound)
                                 gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
@@ -336,76 +336,182 @@ function graph(element, DATA, title) {
 
                 filterByY1();
 
+                // [color][silent] ... [2 speaker & 1 typer] [values of each]
+                var setManager = [];
+                var unsetManager = [0, 1, 2, 3];
 
-                $("#other").on("click", function() {
-                    //shadeGraph.style("fill", "url(#grad" + element + ")");
-                    //filterColor(1, true);
-                    //for (var i = 0; i < filters[1].length; i++)
-                    //filters[1][i].attr('style', 'stop-opacity:0');
-
-
-                    shadeGraph.style("fill", "url(#gradY1" + element + ")");
+                var setY1Manager = [];
+                var unsetY1Manager = [0, 1, 2, 3, 4, 5];
 
 
+                function filterController() {
+                    var internalSetManager, internalY1Manager;
+                    console.log(setY1Manager.length); 
+                    if (setManager.length == 0 && setY1Manager.length == 0) {
+                        $("#all").bootstrapSwitch('state', true);
+                    } else {
+                        console.log("hey")
+                        $("#all").bootstrapSwitch('state', false);
+                        shadeGraph.style("fill", "url(#gradY1" + element + ")");
+
+                        if (setManager.length == 0)
+                            internalSetManager = [0, 1, 2, 3];
+                        else 
+                            internalSetManager = setManager;
+
+                        if (setY1Manager.length == 0)
+                            internalSetY1Manager = [0, 1, 2, 3, 4, 5]
+                        else 
+                            internalSetY1Manager = setY1Manager;
 
 
+                        // Unset (needs to be first)
+                        for (var i = 0; i < gradPointers.length; i++) {
+                            for (var l = 0; l < unsetManager.length; l++) {
+                                if (i == unsetManager[l]) {
+                                    for (var j = 0; j < gradPointers[i].length; j++) {
 
-
-                    //console.log(gradPointers);
-                    //for (var i = 0; i < gradPointers[3].length; i++) {
-                        for (var j = 0; j < gradPointers[3][1].length; j++) {
-                            //console.log(gradPointers[3][0][j]);
-                            gradPointers[3][1][j].attr('style', 'stop-opacity:0');
+                                        for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                            gradPointers[i][j][k].attr('style', 'stop-opacity:0');
+                                        }
+                                    }
+                                }
+                            }
                         }
-                    //}
+                        // Set
+                        for (var i = 0; i < gradPointers.length; i++) {
+                            for (var l = 0; l < internalSetManager.length; l++) {
+                                if (i == internalSetManager[l]) {
+                                    for (var j = 0; j < gradPointers[i].length; j++) {
+                                        for (var m = 0; m < internalSetY1Manager.length; m++) {
+                                            if (j == internalSetY1Manager[m]) {
+                                                for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                                    gradPointers[i][j][k].attr('style', 'stop-opacity:1');
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
-                    //outline.style("opacity", 1);
-                });
-                $("#monitor").on("click", function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
-                    filterColor(2, true);
+                $("[name='my-checkbox']").bootstrapSwitch('onColor', 'success');
+                $("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
+
+                $("#other").change(function() {
+                    console.log($(this).prop('checked'));
+                    if ($(this).prop('checked')) {
+                        setManager.push(0);
+                        console.log(setManager);
+                    } else {
+                        var index = setManager.indexOf(0);
+                        setManager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
-                });
-                $("#keyboard").on("click", function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
-                    filterColor(3, true);
-                    outline.style("opacity", 1);
-                });
-                $("#face").on("click", function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
-                    filterColor(4, true);
-                    outline.style("opacity", 1);
-                });
-                $("#all").on("click", function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
-                    filterColor(0, false);
-                    outline.style("opacity", 0);
                 });
 
-                /*$("#two-sp-one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY16" + element + ")");
+                $("#monitor").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setManager.push(1);
+                    } else {
+                        var index = setManager.indexOf(1);
+                        setManager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
                 });
-                $("#two-sp").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY15" + element + ")");
+                $("#keyboard").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setManager.push(2);
+                    } else {
+                        var index = setManager.indexOf(2);
+                        setManager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-sp-one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY14" + element + ")");
+                $("#face").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setManager.push(3);
+                    } else {
+                        var index = setManager.indexOf(3);
+                        setManager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-sp").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY13" + element + ")");
+                $("#all").on('switchChange.bootstrapSwitch', function(event, state) {
+                    shadeGraph.style("fill", "url(#grad" + element + ")");
+                });
+
+                
+                
+
+
+
+                $("#two-sp-one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(5);
+                    } else {
+                        var index = setY1Manager.indexOf(5);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY12" + element + ")");
+                $("#two-sp").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(4);
+                    } else {
+                        var index = setY1Manager.indexOf(4);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
                 });
-                $("#silent").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradY11" + element + ")");
+                $("#one-sp-one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(3);
+                    } else {
+                        var index = setY1Manager.indexOf(3);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
                     outline.style("opacity", 1);
-                });*/
+                });
+                $("#one-sp").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(2);
+                    } else {
+                        var index = setY1Manager.indexOf(2);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
+                    outline.style("opacity", 1);
+                });
+                $("#one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(1);
+                    } else {
+                        var index = setY1Manager.indexOf(1);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
+                    outline.style("opacity", 1);
+                });
+                $("#silent").on('switchChange.bootstrapSwitch', function(event, state) {
+                    if (state) {
+                        setY1Manager.push(0);
+                    } else {
+                        var index = setY1Manager.indexOf(0);
+                        setY1Manager.splice(index, 1);
+                    }
+                    filterController();
+                    outline.style("opacity", 1);
+                });
 
 
 
@@ -466,4 +572,4 @@ var DATA2 = {
 };
 
 graph("graph1", DATA1, "Stages of Distraction Conversation 1");
-//graph("graph2", DATA2, "Stages of Distraction Conversation 2");
+graph("graph2", DATA2, "Stages of Distraction Conversation 2");

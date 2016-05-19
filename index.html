@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="css/grapher.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/awesome-bootstrap-checkbox.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-switch.min.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="js/jquery-1.12.1.min.js"></script>
+    <script src="js/bootstrap-switch.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <style>
     div {
         font-family: Arial;
@@ -15,40 +18,31 @@
     label {
         margin-right: 30px;
     }
-
+    
+    .bootstrap-switch-normal {
+        width: 300px;
+    }
     </style>
 </head>
 
 <body>
     <div id="graph1"></div>
     <div id="graph2"></div>
-    <div style="margin-left: 120px" >Filters</div>
-
-    <div style="margin-left: 120px" class="radio">
-        <input type="radio" name="radio2" id="other">
-        <label for="radio2"> Other </label>
-        <input type="radio" name="radio2" id="monitor">
-        <label for="radio2"> Monitor </label>
-        <input type="radio" name="radio2" id="keyboard">
-        <label for="radio2"> Keyboard </label>
-        <input type="radio" name="radio2" id="face">
-        <label for="radio2"> Face </label>
-        <input type="radio" name="radio2" id="all">
-        <label for="radio2"> Show All </label>
+    <div style="margin-left: 120px">Filters</div>
+    <div style="margin-left: 120px">
+        <input data-toggle="toggle" data-onstyle="success" id="other" type="checkbox" data-on="Other" data-off="Other">
+        <input name="my-checkbox" id="monitor" type="checkbox" data-on="Monitor" data-off="Monitor">
+        <input name="my-checkbox" id="keyboard" type="checkbox" data-label-text="keyboard">
+        <input name="my-checkbox" id="face" type="checkbox" data-label-text="face">
+        <input data-toggle="toggle" id="all" type="checkbox" data-on="Show All" data-off="Show All">
     </div>
-    <div style="margin-left: 120px"  class="radio">
-        <input type="radio" name="radio2" id="two-sp-one-ty">
-        <label for="radio2"> 2 Speakers & 1 Typer </label>
-        <input type="radio" name="radio2" id="two-sp">
-        <label for="radio2"> 2 Speakers </label>
-        <input type="radio" name="radio2" id="one-sp-one-ty">
-        <label for="radio2"> 1 Speaker & Typer </label>
-        <input type="radio" name="radio2" id="one-sp">
-        <label for="radio2"> 1 Speaker </label>
-        <input type="radio" name="radio2" id="one-ty">
-        <label for="radio2"> 1 Typer </label>
-        <input type="radio" name="radio2" id="silent">
-        <label for="radio2"> Silent </label>
+    <div style="margin-left: 120px">
+        <input name="my-checkbox" id="two-sp-one-ty" type="checkbox" data-label-text="2 Speakers & 1 Typer">
+        <input name="my-checkbox" id="two-sp" type="checkbox" data-label-text="Two_Speakers">
+        <input name="my-checkbox" id="one-sp-one-ty" type="checkbox" data-label-text="1 Speaker & Typer">
+        <input name="my-checkbox" id="one-sp" type="checkbox" data-label-text="One_Speaker">
+        <input name="my-checkbox" id="one-ty" data-size="small" type="checkbox" data-label-text="1 Typer">
+        <input name="my-checkbox" id="silent" type="checkbox" data-label-text="Silent">
     </div>
     <!-- <button id="save">Save as Image</button>
     <h2>SVG dataurl:</h2>
@@ -56,9 +50,17 @@
     <h2>SVG converted to PNG dataurl via HTML5 CANVAS:</h2>
     <div id="pngdataurl"></div>
     <canvas width="960" height="500" style="display:none"></canvas> -->
+    <script>
+    $("div.input.keyboard").bootstrapSwitch({
+        "onText": "Keyboard",
+        "size": "normal"
+    });
+    </script>
     <script src="js/d3.js"></script>
     <script src="js/d3.tip.js"></script>
     <script src="js/grapher.js"></script>
+    <script>
+    </script>
 </body>
 
 </html>
