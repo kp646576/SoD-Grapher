@@ -19,7 +19,7 @@ function graph(element, DATA, title) {
         yAxisLabel: "" //"Sound Type"
     };
 
-    var bgColor = "white";
+    var bgColor = "transparent";
     var svg = d3.select("#" + element).append("svg")
         .attr("width", WIDTH + MARGINS.left + MARGINS.right)
         .attr("height", HEIGHT + MARGINS.top + MARGINS.bottom);
@@ -200,13 +200,36 @@ function graph(element, DATA, title) {
                     .append("linearGradient")
                     .attr("id", "grad" + element);
 
-                // Set up initial gradient
-                var stop = [];
-                var start = [];
+                // Set up initial gradient                
+                var filters = new Array();
+                var numColors = 4;
+                for (var i = 0; i < numColors; i++) {
+                    filters[i] = new Array();
+                }
+                var prevColor, curColor;
+
+
+
+
+
+
                 for (var i = 1; i < data2.length; i++) {
+                    prevColor = data2[i - 1].color;
+                    curColor = data2[i].color;
+
+                    var tmp1 = addColorStop(grad, data2[i].time, colors(data2[i - 1].color));
+                    //console.log(data2[i - 1].color - 1);
+                    filters[data2[i - 1].color - 1].push(tmp1);
+
+                    var tmp2 = addColorStop(grad, data2[i].time, colors(data2[i].color));
+                    filters[data2[i].color - 1].push(tmp2);
+                }
+
+
+                /*for (var i = 1; i < data2.length; i++) {
                     stop.push(addColorStop(grad, data2[i].time, colors(data2[i - 1].color)));
                     start.push(addColorStop(grad, data2[i].time, colors(data2[i].color)));
-                }
+                }*/
 
                 var area = d3.svg.area()
                     // Used for holes in data
@@ -233,104 +256,110 @@ function graph(element, DATA, title) {
 
 
 
-
+                // Cut finely, and turn on off through opacity 
 
                 var bisect = d3.bisector(function(d) {
                     return d.time;
                 }).left;
 
-                function filterSound(fSound) {
 
-                    var gradSound = svg.append("defs")
+
+
+
+                var gradPointers = new Array();
+
+                var numY1 = 6;
+                for (var i = 0; i < numColors; i++) {
+                    gradPointers[i] = new Array(6);
+                    for (var j = 0; j < numY1; j++) {
+                        gradPointers[i][j] = new Array();
+                    }
+                }
+
+                // Offset color and sound by 1 to start from 0 index
+
+
+                //[y1][y2];
+
+                function filterByY1(filterY1) {
+                    var gradY1 = svg.append("defs")
                         .append("linearGradient")
-                        .attr("id", "gradSound" + fSound + element);
-
+                        .attr("id", "gradY1" + element);
 
                     for (var i = 1; i < data2.length; i++) {
-                        // data less than the the border amount |    before the change|
-                        var inside = false;
+                        var data2Color = data2[i - 1].color;
+                        
+                        // Get same color values from certain range
                         var range = data.filter(function(d) {
                             return d.time < data2[i].time && d.time >= data2[i - 1].time;
-                        });
+                        });           
 
-                        // Begin Boundary
-                        var boundaryColor;
-                        // Need to subtract first value off to get correct color
-                        if (data[bisect(data, data2[i - 1].time) <= 0 ? 0 : bisect(data, data2[i - 1].time) - 1].sound == fSound)
-                            boundaryColor = colors(data2[i - 1].color);
-                        else
-                            boundaryColor = "white";
-
-
-                        // Filtered data1 (empty data)
-                        if (range.length > 0) {
-                            var startColor = range[0].sound != fSound ? "white" : colors(data2[i - 1].color);
-                            // Stop
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[0].time) / (maxTime - minTime)).attr("stop-color", boundaryColor);
-                            // Start
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[0].time) / (maxTime - minTime)).attr("stop-color", startColor);
+                        // From previous color set to new color
+                        var prevY2 = i > 1 ? data[bisect(data, data2[i - 1].time) - 1] : data[bisect(data, data2[i - 1].time)];
+                        if (range.length > 0 && prevY2.sound != range[0].sound) {
+                            gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2[i - 1].color)));
+                        }
+                        
+                        // Set contains only 1 value
+                        if (range.length == 1) {
+                            gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2Color)));
                         }
 
-                        // Everything in this range will be either data2[i-1] or white
-                        var prevColor;
-                        var curColor = startColor;
+                        console.log("start");
                         for (var j = 1; j < range.length; j++) {
-                            inside = true;
-                            prevColor = range[j - 1].sound != fSound ? "white" : colors(data2[i - 1].color);
-                            curColor = range[j].sound != fSound ? "white" : colors(data2[i - 1].color);
+                            if (range[j].time < 22) {
+                                console.log(range[j].time);
+                                console.log(range.length);
+                            }
+                            
+                            // Previous point
+                            if (j > 1 && range[j - 2].sound != range[j - 1].sound)
+                                gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
+                            
+                            // Current point
+                            if (range[j - 1].sound != range[j].sound)
+                                gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
 
-                            //console.log("range[" + j.toString() + "].time: " + range[j].time);
-                            //console.log("range[j] color: " + curColor);
-                            // Stop
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", prevColor);
-                            // Start
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - range[j].time) / (maxTime - minTime)).attr("stop-color", curColor);
-                        }
-                        //console.log("ending color: " + curColor.toString());
-                        // Last range color cut off at start of next d2[i] value/ end value (stop)
-
-                        // Need if statement to get around empty data1 case (change only if the data1 is not empty)
-                        if (range.length > 0) {
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", curColor);
                         }
 
-                        //console.log("data2[i].time: " + data2[i].time.toString());
-                        // End boundary
-                        // Need to subtract 1 from the index to get correct value
-                        // Next color data value (can potentially be the same color)
-                        // Start
-                        //console.log("ALL data2[i].time: " + data2[i].time);
-                        //console.log("ALL BISECT: " + data[bisect(data, data2[i].time) - 1].sound);
 
-                        if (!inside && data[bisect(data, data2[i].time) - 1].sound == fSound) {
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i - 1].color));
-                        } else {
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
-                        }
-                        if (data[bisect(data, data2[i].time) - 1].sound == fSound) {
-                            // Need to use next value so "i"
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", colors(data2[i].color));
-                        } else {
-                            // Set value to white if it's not 0.5 (don't care about the color)
-                            gradSound.append("stop").attr("offset", 1 - (maxTime - data2[i].time) / (maxTime - minTime)).attr("stop-color", "white");
-                        }
+                        // Boundary check (for sharp color change to the next color)
+                        var endingVal = data[bisect(data, data2[i].time) - 1].sound - 1;
+                        gradPointers[data2Color - 1][endingVal].push(addColorStop(gradY1, data2[i].time, colors(data2Color)));
+                        // offset 1
+                        gradPointers[data2[i].color - 1][endingVal].push(addColorStop(gradY1, data2[i].time, colors(data2[i].color)));
                     }
                 }
 
 
-
-                // Run all of the sound gradients
-                var tmp = [1, 2, 3, 4, 5, 6];
-                for (var i = 0; i < yAxisVals.length - 1; i++) {
-                    filterSound(tmp[i]);
-                }
-
+                filterByY1();
 
 
                 $("#other").on("click", function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
-                    filterColor(1, true);
-                    outline.style("opacity", 1);
+                    //shadeGraph.style("fill", "url(#grad" + element + ")");
+                    //filterColor(1, true);
+                    //for (var i = 0; i < filters[1].length; i++)
+                    //filters[1][i].attr('style', 'stop-opacity:0');
+
+
+                    shadeGraph.style("fill", "url(#gradY1" + element + ")");
+
+
+
+
+
+
+                    //console.log(gradPointers);
+                    //for (var i = 0; i < gradPointers[3].length; i++) {
+                        for (var j = 0; j < gradPointers[3][1].length; j++) {
+                            //console.log(gradPointers[3][0][j]);
+                            gradPointers[3][1][j].attr('style', 'stop-opacity:0');
+                        }
+                    //}
+
+                    //outline.style("opacity", 1);
                 });
                 $("#monitor").on("click", function() {
                     shadeGraph.style("fill", "url(#grad" + element + ")");
@@ -352,30 +381,31 @@ function graph(element, DATA, title) {
                     filterColor(0, false);
                     outline.style("opacity", 0);
                 });
-                $("#two-sp-one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound6" + element + ")");
+
+                /*$("#two-sp-one-ty").on("click", function() {
+                    shadeGraph.style("fill", "url(#gradY16" + element + ")");
                     outline.style("opacity", 1);
                 });
                 $("#two-sp").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound5" + element + ")");
+                    shadeGraph.style("fill", "url(#gradY15" + element + ")");
                     outline.style("opacity", 1);
                 });
                 $("#one-sp-one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound4" + element + ")");
+                    shadeGraph.style("fill", "url(#gradY14" + element + ")");
                     outline.style("opacity", 1);
                 });
                 $("#one-sp").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound3" + element + ")");
+                    shadeGraph.style("fill", "url(#gradY13" + element + ")");
                     outline.style("opacity", 1);
                 });
                 $("#one-ty").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound2" + element + ")");
+                    shadeGraph.style("fill", "url(#gradY12" + element + ")");
                     outline.style("opacity", 1);
                 });
                 $("#silent").on("click", function() {
-                    shadeGraph.style("fill", "url(#gradSound1" + element + ")");
+                    shadeGraph.style("fill", "url(#gradY11" + element + ")");
                     outline.style("opacity", 1);
-                });
+                });*/
 
 
 
@@ -436,4 +466,4 @@ var DATA2 = {
 };
 
 graph("graph1", DATA1, "Stages of Distraction Conversation 1");
-graph("graph2", DATA2, "Stages of Distraction Conversation 2");
+//graph("graph2", DATA2, "Stages of Distraction Conversation 2");

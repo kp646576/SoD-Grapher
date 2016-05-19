@@ -55,3 +55,9 @@ for (var i = 1; i < data2.length; i++) {
                 // Do not have to worry about shading last value (will use last value until the end)
                 // Use data from second graph
                 // Hack needed to change color using gradient to have abrupt color changes
+
+
+ Purpose of Bisect
+
+ Data assumption:
+ no two color values are the same (ex: 4, 4, 4)
