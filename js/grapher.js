@@ -350,7 +350,6 @@ function graph(element, DATA, title) {
                     if (setManager.length == 0 && setY1Manager.length == 0) {
                         $("#all").bootstrapSwitch('state', true);
                     } else {
-                        console.log("hey")
                         $("#all").bootstrapSwitch('state', false);
                         shadeGraph.style("fill", "url(#gradY1" + element + ")");
 
@@ -398,13 +397,12 @@ function graph(element, DATA, title) {
                 }
 
                 $("[name='my-checkbox']").bootstrapSwitch('onColor', 'success');
-                $("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
-
-                $("#other").change(function() {
-                    console.log($(this).prop('checked'));
+                //$("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
+                //$('#other').bootstrapToggle();
+          
+               $("#other").change(function() {
                     if ($(this).prop('checked')) {
                         setManager.push(0);
-                        console.log(setManager);
                     } else {
                         var index = setManager.indexOf(0);
                         setManager.splice(index, 1);
@@ -412,9 +410,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-
-                $("#monitor").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+        
+                $("#monitor").change(function() {
+                    if ($(this).prop('checked')) {
                         setManager.push(1);
                     } else {
                         var index = setManager.indexOf(1);
@@ -423,8 +421,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#keyboard").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#keyboard").change(function() {
+                    if ($(this).prop('checked')) {
                         setManager.push(2);
                     } else {
                         var index = setManager.indexOf(2);
@@ -433,8 +432,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#face").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#face").change(function() {
+                    if ($(this).prop('checked')) {
                         setManager.push(3);
                     } else {
                         var index = setManager.indexOf(3);
@@ -443,17 +443,12 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#all").on('switchChange.bootstrapSwitch', function(event, state) {
+                $("#all").change(function() {
                     shadeGraph.style("fill", "url(#grad" + element + ")");
                 });
 
-                
-                
-
-
-
-                $("#two-sp-one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+                $("#two-sp-one-ty").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(5);
                     } else {
                         var index = setY1Manager.indexOf(5);
@@ -462,8 +457,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#two-sp").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#two-sp").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(4);
                     } else {
                         var index = setY1Manager.indexOf(4);
@@ -472,8 +468,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-sp-one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#one-sp-one-ty").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(3);
                     } else {
                         var index = setY1Manager.indexOf(3);
@@ -482,8 +479,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-sp").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#one-sp").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(2);
                     } else {
                         var index = setY1Manager.indexOf(2);
@@ -492,8 +490,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#one-ty").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#one-ty").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(1);
                     } else {
                         var index = setY1Manager.indexOf(1);
@@ -502,8 +501,9 @@ function graph(element, DATA, title) {
                     filterController();
                     outline.style("opacity", 1);
                 });
-                $("#silent").on('switchChange.bootstrapSwitch', function(event, state) {
-                    if (state) {
+
+                $("#silent").change(function() {
+                    if ($(this).prop('checked')) {
                         setY1Manager.push(0);
                     } else {
                         var index = setY1Manager.indexOf(0);

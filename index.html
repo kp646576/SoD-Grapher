@@ -5,22 +5,10 @@
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" type="text/css" href="css/grapher.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/bootstrap-switch.min.css">
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="js/jquery-1.12.1.min.js"></script>
-    <script src="js/bootstrap-switch.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <style>
     div {
         font-family: Arial;
-    }
-    
-    label {
-        margin-right: 30px;
-    }
-    
-    .bootstrap-switch-normal {
-        width: 300px;
     }
     </style>
 </head>
@@ -31,18 +19,18 @@
     <div style="margin-left: 120px">Filters</div>
     <div style="margin-left: 120px">
         <input data-toggle="toggle" data-onstyle="success" id="other" type="checkbox" data-on="Other" data-off="Other">
-        <input name="my-checkbox" id="monitor" type="checkbox" data-on="Monitor" data-off="Monitor">
-        <input name="my-checkbox" id="keyboard" type="checkbox" data-label-text="keyboard">
-        <input name="my-checkbox" id="face" type="checkbox" data-label-text="face">
-        <input data-toggle="toggle" id="all" type="checkbox" data-on="Show All" data-off="Show All">
+        <input data-toggle="toggle" data-onstyle="success" id="monitor" type="checkbox" data-on="Monitor" data-off="Monitor">
+        <input data-toggle="toggle" data-onstyle="success" id="keyboard" type="checkbox" data-on="Keyboard" data-off="Keyboard">
+        <input data-toggle="toggle" data-onstyle="success" id="face" type="checkbox" data-on="Face" data-off="Face">
+        <input data-toggle="toggle" data-onstyle="success" id="all" type="checkbox" data-on="Show All" data-off="Show All" checked>
     </div>
     <div style="margin-left: 120px">
-        <input name="my-checkbox" id="two-sp-one-ty" type="checkbox" data-label-text="2 Speakers & 1 Typer">
-        <input name="my-checkbox" id="two-sp" type="checkbox" data-label-text="Two_Speakers">
-        <input name="my-checkbox" id="one-sp-one-ty" type="checkbox" data-label-text="1 Speaker & Typer">
-        <input name="my-checkbox" id="one-sp" type="checkbox" data-label-text="One_Speaker">
-        <input name="my-checkbox" id="one-ty" data-size="small" type="checkbox" data-label-text="1 Typer">
-        <input name="my-checkbox" id="silent" type="checkbox" data-label-text="Silent">
+        <input data-toggle="toggle" data-onstyle="success" id="two-sp-one-ty" type="checkbox" data-width="200" data-on="2 Speakers & 1 Typer" data-off="2 Speakers & 1 Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="two-sp" type="checkbox" data-on="2 Speakers" data-off="2 Speakers">
+        <input data-toggle="toggle" data-onstyle="success" id="one-sp-one-ty" type="checkbox" data-width="200" data-on="1 Speaker & Typer" data-off="1 Speaker & Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="one-sp" type="checkbox" data-on="1 Speaker" data-off="1 Speaker">
+        <input data-toggle="toggle" data-onstyle="success" id="one-ty" type="checkbox" data-on="1 Typer" data-off="1 Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="silent" type="checkbox" data-on="Silent" data-off="Silent">
     </div>
     <!-- <button id="save">Save as Image</button>
     <h2>SVG dataurl:</h2>
@@ -50,17 +38,11 @@
     <h2>SVG converted to PNG dataurl via HTML5 CANVAS:</h2>
     <div id="pngdataurl"></div>
     <canvas width="960" height="500" style="display:none"></canvas> -->
-    <script>
-    $("div.input.keyboard").bootstrapSwitch({
-        "onText": "Keyboard",
-        "size": "normal"
-    });
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script src="js/d3.js"></script>
     <script src="js/d3.tip.js"></script>
     <script src="js/grapher.js"></script>
-    <script>
-    </script>
 </body>
 
 </html>
