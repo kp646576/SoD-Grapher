@@ -346,21 +346,23 @@ function graph(element, DATA, title) {
 
                 function filterController() {
                     var internalSetManager, internalY1Manager;
-                    console.log(setY1Manager.length); 
+                    //console.log(setY1Manager.length);
                     if (setManager.length == 0 && setY1Manager.length == 0) {
-                        $("#all").bootstrapSwitch('state', true);
+                        //$("#all").bootstrapSwitch('state', true);
+                        $("#all").bootstrapToggle('on');
                     } else {
-                        $("#all").bootstrapSwitch('state', false);
+                        //$("#all").bootstrapSwitch('state', false);
+                        $('#all').bootstrapToggle('off');
                         shadeGraph.style("fill", "url(#gradY1" + element + ")");
 
                         if (setManager.length == 0)
                             internalSetManager = [0, 1, 2, 3];
-                        else 
+                        else
                             internalSetManager = setManager;
 
                         if (setY1Manager.length == 0)
                             internalSetY1Manager = [0, 1, 2, 3, 4, 5]
-                        else 
+                        else
                             internalSetY1Manager = setY1Manager;
 
 
@@ -396,124 +398,75 @@ function graph(element, DATA, title) {
                     }
                 }
 
-                $("[name='my-checkbox']").bootstrapSwitch('onColor', 'success');
                 //$("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
                 //$('#other').bootstrapToggle();
-          
-               $("#other").change(function() {
-                    if ($(this).prop('checked')) {
-                        setManager.push(0);
+
+                function clickRoutine(prop, manager, value) {
+
+                    if ($(prop).prop('checked')) {
+                        manager.push(value);
                     } else {
-                        var index = setManager.indexOf(0);
-                        setManager.splice(index, 1);
+                        var index = manager.indexOf(value);
+                        manager.splice(index, 1);
                     }
+                    //console.log(setManager);
                     filterController();
                     outline.style("opacity", 1);
+                }
+
+                //$("#all").bootstrapToggle("off");
+                $("#other").change(function() {
+                    clickRoutine("#other", setManager, 0);
                 });
-        
+
                 $("#monitor").change(function() {
-                    if ($(this).prop('checked')) {
-                        setManager.push(1);
-                    } else {
-                        var index = setManager.indexOf(1);
-                        setManager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                    clickRoutine("#monitor", setManager, 1);
                 });
 
                 $("#keyboard").change(function() {
-                    if ($(this).prop('checked')) {
-                        setManager.push(2);
-                    } else {
-                        var index = setManager.indexOf(2);
-                        setManager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                    clickRoutine("#keyboard", setManager, 2);
                 });
 
                 $("#face").change(function() {
-                    if ($(this).prop('checked')) {
-                        setManager.push(3);
-                    } else {
-                        var index = setManager.indexOf(3);
-                        setManager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                    clickRoutine("#face", setManager, 3);
                 });
+
+
+                var variables = ["other", "monitor", "keyboard", "face", "silent", "one-ty", "one-sp", "one-sp-one-ty", "two-sp", "two-sp-one-ty"];
                 $("#all").change(function() {
-                    shadeGraph.style("fill", "url(#grad" + element + ")");
+                    if ($(this).prop('checked')) {
+                        
+                        for (var i = 0; i < variables.length; i++) {
+                            $("#" + variables[i]).bootstrapToggle("off")
+                        }
+                        shadeGraph.style("fill", "url(#grad" + element + ")");
+                    }
                 });
 
-                $("#two-sp-one-ty").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(5);
-                    } else {
-                        var index = setY1Manager.indexOf(5);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
-                });
 
-                $("#two-sp").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(4);
-                    } else {
-                        var index = setY1Manager.indexOf(4);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
-                });
-
-                $("#one-sp-one-ty").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(3);
-                    } else {
-                        var index = setY1Manager.indexOf(3);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
-                });
-
-                $("#one-sp").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(2);
-                    } else {
-                        var index = setY1Manager.indexOf(2);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                $("#silent").change(function() {
+                    clickRoutine("#silent", setY1Manager, 0);
                 });
 
                 $("#one-ty").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(1);
-                    } else {
-                        var index = setY1Manager.indexOf(1);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                    clickRoutine("#one-ty", setY1Manager, 1);
                 });
 
-                $("#silent").change(function() {
-                    if ($(this).prop('checked')) {
-                        setY1Manager.push(0);
-                    } else {
-                        var index = setY1Manager.indexOf(0);
-                        setY1Manager.splice(index, 1);
-                    }
-                    filterController();
-                    outline.style("opacity", 1);
+                $("#one-sp").change(function() {
+                    clickRoutine("#one-sp", setY1Manager, 2);
                 });
 
+                $("#one-sp-one-ty").change(function() {
+                    clickRoutine("#one-sp-one-ty", setY1Manager, 3);
+                });
 
+                $("#two-sp").change(function() {
+                    clickRoutine("#two-sp", setY1Manager, 4);
+                });
+
+                $("#two-sp-one-ty").change(function() {
+                    clickRoutine("#two-sp-one-ty", setY1Manager, 5);
+                });
 
             });
             // End Data2 Function
