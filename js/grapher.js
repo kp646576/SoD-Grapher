@@ -359,6 +359,9 @@ function graph(element, DATA, title) {
                         internalSetY1Manager = setY1Manager;
 
 
+
+                    console.log(internalSetManager);
+
                     // Unset (needs to be first)
                     for (var i = 0; i < gradPointers.length; i++) {
                         for (var l = 0; l < unsetManager.length; l++) {
@@ -388,26 +391,29 @@ function graph(element, DATA, title) {
                             }
                         }
                     }
-                    //}
                 }
 
                 //$("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
                 //$('#other').bootstrapToggle();
 
                 function clickRoutine(prop, manager, value) {
-                    $('#all').prop('checked', false).change()
                     if ($(prop).prop('checked')) {
+                        // Turn all off when filter selection is made
+                        if ($('#all').prop('checked')) {
+                            $('#all').prop('checked', false).change();
+                        }
                         manager.push(value);
                     } else {
                         var index = manager.indexOf(value);
                         manager.splice(index, 1);
                     }
-                    //console.log(setManager);
-                    filterController();
-                    outline.style("opacity", 1);
+                    if (setManager.length == 0 && setY1Manager.length == 0)
+                      $("#all").bootstrapToggle("on");
+                    else 
+                        filterController();
                 }
 
-                //$("#all").bootstrapToggle("off");
+                // Y1 Filters
                 $("#other").change(function() {
                     clickRoutine("#other", setManager, 0);
                 });
@@ -424,20 +430,7 @@ function graph(element, DATA, title) {
                     clickRoutine("#face", setManager, 3);
                 });
 
-
-                var variables = ["other", "monitor", "keyboard", "face", "silent", "one-ty", "one-sp", "one-sp-one-ty", "two-sp", "two-sp-one-ty"];
-
-                $("#all").change(function() {
-                    if ($(this).prop('checked')) {
-                        for (var i = 0; i < variables.length; i++) {
-                            $("#" + variables[i]).bootstrapToggle("off")
-                        }
-                        // Namespace issue
-                        //outline.style("opacity", 0);
-                        filterController();
-                    }
-                });
-
+                // Y2 Filters
                 $("#silent").change(function() {
                     clickRoutine("#silent", setY1Manager, 0);
                 });
@@ -462,6 +455,23 @@ function graph(element, DATA, title) {
                     clickRoutine("#two-sp-one-ty", setY1Manager, 5);
                 });
 
+                // Additional Filters
+                var variables = ["other", "monitor", "keyboard", "face", "silent", "one-ty", "one-sp", "one-sp-one-ty", "two-sp", "two-sp-one-ty"];
+
+                $("#all").change(function() {
+                    if ($(this).prop('checked')) {
+                        for (var i = 0; i < variables.length; i++) {
+                            if ($("#" + variables[i]).prop('checked'))
+                                $("#" + variables[i]).bootstrapToggle("off")
+                        }
+                        filterController();
+                    }
+                });
+
+                $("#outline").change(function() {
+                    var opacity = $(this).prop('checked') ? 1 : 0;
+                    outline.style("opacity", opacity);
+                });
             });
             // End Data2 Function
         }
