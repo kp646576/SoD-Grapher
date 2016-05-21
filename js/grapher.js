@@ -335,6 +335,7 @@ function graph(element, DATA, title) {
 
 
                 filterByY1();
+                shadeGraph.style("fill", "url(#gradY1" + element + ")");
 
                 // [color][silent] ... [2 speaker & 1 typer] [values of each]
                 var setManager = [];
@@ -346,49 +347,40 @@ function graph(element, DATA, title) {
 
                 function filterController() {
                     var internalSetManager, internalY1Manager;
-                    //console.log(setY1Manager.length);
-                    if (setManager.length == 0 && setY1Manager.length == 0) {
-                        //$("#all").bootstrapSwitch('state', true);
-                        $("#all").bootstrapToggle('on');
-                    } else {
-                        //$("#all").bootstrapSwitch('state', false);
-                        $('#all').bootstrapToggle('off');
-                        shadeGraph.style("fill", "url(#gradY1" + element + ")");
+                    // if all is on then 
+                    if (setManager.length == 0)
+                        internalSetManager = [0, 1, 2, 3];
+                    else
+                        internalSetManager = setManager;
 
-                        if (setManager.length == 0)
-                            internalSetManager = [0, 1, 2, 3];
-                        else
-                            internalSetManager = setManager;
-
-                        if (setY1Manager.length == 0)
-                            internalSetY1Manager = [0, 1, 2, 3, 4, 5]
-                        else
-                            internalSetY1Manager = setY1Manager;
+                    if (setY1Manager.length == 0)
+                        internalSetY1Manager = [0, 1, 2, 3, 4, 5]
+                    else
+                        internalSetY1Manager = setY1Manager;
 
 
-                        // Unset (needs to be first)
-                        for (var i = 0; i < gradPointers.length; i++) {
-                            for (var l = 0; l < unsetManager.length; l++) {
-                                if (i == unsetManager[l]) {
-                                    for (var j = 0; j < gradPointers[i].length; j++) {
+                    // Unset (needs to be first)
+                    for (var i = 0; i < gradPointers.length; i++) {
+                        for (var l = 0; l < unsetManager.length; l++) {
+                            if (i == unsetManager[l]) {
+                                for (var j = 0; j < gradPointers[i].length; j++) {
 
-                                        for (var k = 0; k < gradPointers[i][j].length; k++) {
-                                            gradPointers[i][j][k].attr('style', 'stop-opacity:0');
-                                        }
+                                    for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                        gradPointers[i][j][k].attr('style', 'stop-opacity:0');
                                     }
                                 }
                             }
                         }
-                        // Set
-                        for (var i = 0; i < gradPointers.length; i++) {
-                            for (var l = 0; l < internalSetManager.length; l++) {
-                                if (i == internalSetManager[l]) {
-                                    for (var j = 0; j < gradPointers[i].length; j++) {
-                                        for (var m = 0; m < internalSetY1Manager.length; m++) {
-                                            if (j == internalSetY1Manager[m]) {
-                                                for (var k = 0; k < gradPointers[i][j].length; k++) {
-                                                    gradPointers[i][j][k].attr('style', 'stop-opacity:1');
-                                                }
+                    }
+                    // Set
+                    for (var i = 0; i < gradPointers.length; i++) {
+                        for (var l = 0; l < internalSetManager.length; l++) {
+                            if (i == internalSetManager[l]) {
+                                for (var j = 0; j < gradPointers[i].length; j++) {
+                                    for (var m = 0; m < internalSetY1Manager.length; m++) {
+                                        if (j == internalSetY1Manager[m]) {
+                                            for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                                gradPointers[i][j][k].attr('style', 'stop-opacity:1');
                                             }
                                         }
                                     }
@@ -396,13 +388,14 @@ function graph(element, DATA, title) {
                             }
                         }
                     }
+                    //}
                 }
 
                 //$("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
                 //$('#other').bootstrapToggle();
 
                 function clickRoutine(prop, manager, value) {
-
+                    $('#all').prop('checked', false).change()
                     if ($(prop).prop('checked')) {
                         manager.push(value);
                     } else {
@@ -433,16 +426,17 @@ function graph(element, DATA, title) {
 
 
                 var variables = ["other", "monitor", "keyboard", "face", "silent", "one-ty", "one-sp", "one-sp-one-ty", "two-sp", "two-sp-one-ty"];
+
                 $("#all").change(function() {
                     if ($(this).prop('checked')) {
-                        
                         for (var i = 0; i < variables.length; i++) {
                             $("#" + variables[i]).bootstrapToggle("off")
                         }
-                        shadeGraph.style("fill", "url(#grad" + element + ")");
+                        // Namespace issue
+                        //outline.style("opacity", 0);
+                        filterController();
                     }
                 });
-
 
                 $("#silent").change(function() {
                     clickRoutine("#silent", setY1Manager, 0);
