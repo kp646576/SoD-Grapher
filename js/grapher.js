@@ -10,8 +10,8 @@ function graph(element, DATA, title) {
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 1500 - MARGINS.left - MARGINS.right;
-    var HEIGHT = 300 - MARGINS.top - MARGINS.bottom;
+    var WIDTH = 6000 - MARGINS.left - MARGINS.right;
+    var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
         title: title,
@@ -191,45 +191,8 @@ function graph(element, DATA, title) {
                     }
                 }
 
-
                 // Use data from first graph
                 svg.datum(data);
-
-                // Color gradient
-                grad = svg.append("defs")
-                    .append("linearGradient")
-                    .attr("id", "grad" + element);
-
-                // Set up initial gradient                
-                var filters = new Array();
-                var numColors = 4;
-                for (var i = 0; i < numColors; i++) {
-                    filters[i] = new Array();
-                }
-                var prevColor, curColor;
-
-
-
-
-
-
-                for (var i = 1; i < data2.length; i++) {
-                    prevColor = data2[i - 1].color;
-                    curColor = data2[i].color;
-
-                    var tmp1 = addColorStop(grad, data2[i].time, colors(data2[i - 1].color));
-                    //console.log(data2[i - 1].color - 1);
-                    filters[data2[i - 1].color - 1].push(tmp1);
-
-                    var tmp2 = addColorStop(grad, data2[i].time, colors(data2[i].color));
-                    filters[data2[i].color - 1].push(tmp2);
-                }
-
-
-                /*for (var i = 1; i < data2.length; i++) {
-                    stop.push(addColorStop(grad, data2[i].time, colors(data2[i - 1].color)));
-                    start.push(addColorStop(grad, data2[i].time, colors(data2[i].color)));
-                }*/
 
                 var area = d3.svg.area()
                     // Used for holes in data
@@ -252,34 +215,35 @@ function graph(element, DATA, title) {
                         return HEIGHT - MARGINS.bottom;
                     }));
 
-
-
-
-
                 // Cut finely, and turn on off through opacity 
-
                 var bisect = d3.bisector(function(d) {
                     return d.time;
                 }).left;
 
-
-
-
-
+                // Intiate crusts
                 var gradPointers = new Array();
+                var crusts = new Array();
 
+                var numColors = 4;
                 var numY1 = 6;
                 for (var i = 0; i < numColors; i++) {
                     gradPointers[i] = new Array(6);
+
                     for (var j = 0; j < numY1; j++) {
                         gradPointers[i][j] = new Array();
                     }
                 }
 
-                // Offset color and sound by 1 to start from 0 index
-
-
-                //[y1][y2];
+                // 3D array to store all the color crusts 
+                // crusts[left sound][right sound] values...
+                var crusts = new Array();
+                for (var i = 0; i < numY1; i++) {
+                    crusts[i] = new Array();
+                    for (var j = 0; j < numY1; j++) {
+                        crusts[i][j] = new Array();
+                    }
+                }
+                var crustOffset = 0.1;
 
                 function filterByY1(filterY1) {
                     var gradY1 = svg.append("defs")
@@ -297,30 +261,55 @@ function graph(element, DATA, title) {
                         // From previous color set to new color
                         var prevY2 = i > 1 ? data[bisect(data, data2[i - 1].time) - 1] : data[bisect(data, data2[i - 1].time)];
                         if (range.length > 0 && prevY2.sound != range[0].sound) {
-                            gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2[i - 1].color)));
+                            gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time - crustOffset, colors(data2[i - 1].color)));
+                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time - crustOffset, colors(data2[i - 1].color)));
+                            if (range[0].time < 10) {
+                                console.log(range[0].time);
+                                console.log("prev sound:" + prevY2.sound);
+                                console.log("cur sound:" + range[0].sound);
+
+                            }
                         }
 
                         // Set contains only 1 value
                         if (range.length == 1) {
-                            gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2Color)));
+                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time + crustOffset, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time + crustOffset, colors(data2Color)));
+
+
                         }
 
-
                         for (var j = 1; j < range.length; j++) {
-                            if (range[j].time < 22) {
-                                //console.log(range[j].time);
+                            if (range[j].time < 10) {
+                                console.log("meat:");
+                                console.log(range[j].time);
                                 //console.log(range.length);
                             }
 
                             // Previous point
-                            if (j > 1 && range[j - 2].sound != range[j - 1].sound)
-                                gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
-                            gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
+                            if (j > 1 && range[j - 2].sound != range[j - 1].sound) {
+                                gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time - crustOffset, colors(data2Color)));
+                                crusts[range[j - 2].sound - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time - crustOffset, colors(data2Color)));
+                                //crusts[range[j - 2].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
+                                //console.log("Previous Point: " + range[j - 2].sound + ":" + range[j - 1].time);
+                            }
+
+                            //console.log("Previous Point: " + range[j - 1].sound + ":" + range[j - 1].time);
+                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
+                            //crusts[range[j - 1].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
 
                             // Current point
-                            if (range[j - 1].sound != range[j].sound)
-                                gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
-                            gradPointers[data2Color - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
+                            if (range[j - 1].sound != range[j].sound) {
+                                gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time - crustOffset, colors(data2Color)));
+                                crusts[range[j - 1].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time - crustOffset, colors(data2Color)));
+                                //crusts[range[j].sound - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
+                                //console.log("Current Point: " + range[j - 1].sound + ":" + range[j].time);
+                                //console.log("Current Point: " + range[j].sound + ":" + range[j].time);
+                            }
+                            crusts[range[j].sound - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
+
 
                         }
 
@@ -337,6 +326,11 @@ function graph(element, DATA, title) {
                 filterByY1();
                 shadeGraph.style("fill", "url(#gradY1" + element + ")");
 
+
+                //================================================================================
+                // Filter Controllers
+                //================================================================================
+                // console.log("length:" + gradPointers[0][1].length);
                 // [color][silent] ... [2 speaker & 1 typer] [values of each]
                 var setManager = [];
                 var unsetManager = [0, 1, 2, 3];
@@ -358,23 +352,27 @@ function graph(element, DATA, title) {
                     else
                         internalSetY1Manager = setY1Manager;
 
+                    //console.log(internalSetY1Manager);
 
-
-                    console.log(internalSetManager);
+                    for (var i = 0; i < crusts.length; i++) {
+                        for (var j = 0; j < crusts[i].length; j++) {
+                            for (var k = 0; k < crusts[i][j].length; k++) {
+                                crusts[i][j][k].attr('style', 'stop-opacity:0');
+                            }
+                        }
+                    }
 
                     // Unset (needs to be first)
                     for (var i = 0; i < gradPointers.length; i++) {
                         for (var l = 0; l < unsetManager.length; l++) {
-                            if (i == unsetManager[l]) {
-                                for (var j = 0; j < gradPointers[i].length; j++) {
-
-                                    for (var k = 0; k < gradPointers[i][j].length; k++) {
-                                        gradPointers[i][j][k].attr('style', 'stop-opacity:0');
-                                    }
+                            for (var j = 0; j < gradPointers[i].length; j++) {
+                                for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                    gradPointers[i][j][k].attr('style', 'stop-opacity:0');
                                 }
                             }
                         }
                     }
+
                     // Set
                     for (var i = 0; i < gradPointers.length; i++) {
                         for (var l = 0; l < internalSetManager.length; l++) {
@@ -383,6 +381,7 @@ function graph(element, DATA, title) {
                                     for (var m = 0; m < internalSetY1Manager.length; m++) {
                                         if (j == internalSetY1Manager[m]) {
                                             for (var k = 0; k < gradPointers[i][j].length; k++) {
+                                                //console.log(gradPointers[i][j][k]);
                                                 gradPointers[i][j][k].attr('style', 'stop-opacity:1');
                                             }
                                         }
@@ -392,9 +391,6 @@ function graph(element, DATA, title) {
                         }
                     }
                 }
-
-                //$("[name='my-checkbox2']").bootstrapSwitch('onColor', 'success');
-                //$('#other').bootstrapToggle();
 
                 function clickRoutine(prop, manager, value) {
                     if ($(prop).prop('checked')) {
@@ -408,11 +404,15 @@ function graph(element, DATA, title) {
                         manager.splice(index, 1);
                     }
                     if (setManager.length == 0 && setY1Manager.length == 0)
-                      $("#all").bootstrapToggle("on");
-                    else 
+                        $("#all").bootstrapToggle("on");
+                    else
                         filterController();
                 }
 
+
+                //================================================================================
+                // Button Controllers
+                //================================================================================
                 // Y1 Filters
                 $("#other").change(function() {
                     clickRoutine("#other", setManager, 0);
@@ -432,6 +432,8 @@ function graph(element, DATA, title) {
 
                 // Y2 Filters
                 $("#silent").change(function() {
+                    //                  filterSound(1);
+                    //shadeGraph.style("fill", "url(#gradSound1)");
                     clickRoutine("#silent", setY1Manager, 0);
                 });
 
@@ -444,6 +446,8 @@ function graph(element, DATA, title) {
                 });
 
                 $("#one-sp-one-ty").change(function() {
+                    //filterSound(4);
+                    //shadeGraph.style("fill", "url(#gradSound4)");
                     clickRoutine("#one-sp-one-ty", setY1Manager, 3);
                 });
 
