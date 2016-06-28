@@ -11,7 +11,7 @@ function graph(element, DATA, title) {
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 2000 - MARGINS.left - MARGINS.right;
+    var WIDTH = 1200 - MARGINS.left - MARGINS.right;
     var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
@@ -123,14 +123,13 @@ function graph(element, DATA, title) {
             .interpolate('step-after');
 
         // Draw Outline
-        var outline;
         var outline = svg.append('path')
             .attr('d', lineGen(data))
             .attr('stroke', 'black')
             .attr('stroke-width', 1.5)
             // Need to no fill black
             .attr('fill', 'none')
-            .style("opacity", 0);
+            .style("opacity", 1);
 
         //================================================================================
         // 2nd Graph (Color)
@@ -205,17 +204,6 @@ function graph(element, DATA, title) {
                     }
                 }
 
-                // 3D array to store all the color crusts 
-                // crusts[left sound][right sound] values...
-                var crusts = new Array();
-                for (var i = 0; i < numY1; i++) {
-                    crusts[i] = new Array();
-                    for (var j = 0; j < numY1; j++) {
-                        crusts[i][j] = new Array();
-                    }
-                }
-                var crustOffset = 0.0;
-
                 function filterByY1(filterY1) {
                     var gradY1 = svg.append("defs")
                         .append("linearGradient")
@@ -232,63 +220,27 @@ function graph(element, DATA, title) {
                         // From previous color set to new color
                         var prevY2 = i > 1 ? data[bisect(data, data2[i - 1].time) - 1] : data[bisect(data, data2[i - 1].time)];
                         if (range.length > 0 && prevY2.sound != range[0].sound) {
-                            gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time - crustOffset, colors(data2[i - 1].color)));
-                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time - crustOffset, colors(data2[i - 1].color)));
-                            if (range[0].time < 10) {
-                                //console.log(range[0].time);
-                                //console.log("prev color:" + data2[i - 1].color);
-                                //console.log("prev sound:" + prevY2.sound);
-                                //console.log("cur color:" + data2Color);
-                                //console.log("cur sound:" + range[0].sound);
-                                //console.log("max:" + maxTime + ":" + minTime);
-
-                            }
+                            gradPointers[data2[i - 1].color - 1][prevY2.sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2[i - 1].color)));
                         }
 
                         // Set contains only 1 value
                         if (range.length == 1) {
-                            console.log("went inside");
-                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time + crustOffset, colors(data2Color)));
-                            gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time + crustOffset, colors(data2Color)));
-
-
+                            gradPointers[data2Color - 1][range[0].sound - 1].push(addColorStop(gradY1, range[0].time, colors(data2Color)));
                         }
 
                         for (var j = 1; j < range.length; j++) {
-                            if (range[j].time < 10) {
-                                //console.log("meat:");
-                                //console.log(range[j].time);
-                                //console.log(range.length);
-                            }
-
                             // Previous point
                             if (j > 1 && range[j - 2].sound != range[j - 1].sound) {
-                                gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time - crustOffset, colors(data2Color)));
-                                crusts[range[j - 2].sound - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time - crustOffset, colors(data2Color)));
-                                //crusts[range[j - 2].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
-                                if (range[j].time < 10) {
-                                    //console.log("Previous Previous Point: " + range[j - 2].sound + ":" + range[j - 1].time);
-                                    //console.log("Previous Point: " + range[j - 1].sound + ":" + range[j - 1].time);
-                                }
+                                gradPointers[data2Color - 1][range[j - 2].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
                             }
 
-                            //console.log("Previous Point: " + range[j - 1].sound + ":" + range[j - 1].time);
-                            crusts[prevY2.sound - 1][range[0].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
-                            gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
-                            //crusts[range[j - 1].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time + crustOffset, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j - 1].time, colors(data2Color)));
 
                             // Current point
                             if (range[j - 1].sound != range[j].sound) {
-                                gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time - crustOffset, colors(data2Color)));
-                                crusts[range[j - 1].sound - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time - crustOffset, colors(data2Color)));
-                                //crusts[range[j].sound - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
-                                if (range[j].time < 10) {
-                                    //console.log("Current Previous Point: " + range[j - 1].sound + ":" + range[j].time);
-                                    //console.log("Current Point: " + range[j].sound + ":" + range[j].time);
-                                }
+                                gradPointers[data2Color - 1][range[j - 1].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
                             }
-                            crusts[range[j].sound - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
-                            gradPointers[data2Color - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time + crustOffset, colors(data2Color)));
+                            gradPointers[data2Color - 1][range[j].sound - 1].push(addColorStop(gradY1, range[j].time, colors(data2Color)));
 
 
                         }
@@ -299,36 +251,15 @@ function graph(element, DATA, title) {
                         gradPointers[data2Color - 1][endingVal].push(addColorStop(gradY1, data2[i].time, colors(data2Color)));
                         // offset 1
                         gradPointers[data2[i].color - 1][endingVal].push(addColorStop(gradY1, data2[i].time, colors(data2[i].color)));
-                        if (data[2].time < 10) {
-                            //console.log("ending value:" + data2Color + ":" + endingVal + ":" + data2[i].time);
-                            //console.log("actual ending value:" + data2[i].color + ":" + endingVal);
-                        }
                     }
                 }
 
                 var grad = svg.append("defs")
                     .append("linearGradient")
                     .attr("id", "grad");
-                //grad.append("stop").attr("offset", 0.004559999999999867).attr("stop-color", "white");
-                grad.append("stop").attr("offset", 0.004559999999999867).attr("stop-color", "blue");
-                //grad.append("stop").attr("offset", 11.577999999999022 / 300).attr("stop-color", "white");
-                //grad.append("stop").attr("offset", 11.577999999999022 / 300).attr("stop-color", "white");
-
-                //1 - (maxTime - 1.3679999999999601) / (maxTime - minTime)
-                //1 - (300 - 1.3679999999999601 + ) / 300
-                /*grad.append("stop").attr("offset",  0.004226666666666601).attr("stop-color", "red");
-                grad.append("stop").attr("offset",  0.004226666666666601).attr("stop-color", "green");
-                grad.append("stop").attr("offset",  0.0045).attr("stop-color", "green");
-                grad.append("stop").attr("offset",  0.0045).attr("stop-color", "white");
-                grad.append("stop").attr("offset",  0.01645999999999992).attr("stop-color", "white");
-                grad.append("stop").attr("offset",  0.01645999999999992).attr("stop-color", "blue");
-                //grad.append("stop").attr("offset", "20%").attr("stop-color", "white");*/
-
-
 
                 filterByY1();
                 shadeGraph.style("fill", "url(#gradY1" + element + ")");
-                //shadeGraph.style("fill", "url(#grad)");
 
                 var legend = svg.selectAll(".legend")
                     .data(["Other", "Monitor", "Keyboard", "Face"])
@@ -379,14 +310,6 @@ function graph(element, DATA, title) {
 
                     //console.log(internalSetY1Manager);
 
-                    for (var i = 0; i < crusts.length; i++) {
-                        for (var j = 0; j < crusts[i].length; j++) {
-                            for (var k = 0; k < crusts[i][j].length; k++) {
-                                crusts[i][j][k].attr('style', 'stop-color:white');
-                            }
-                        }
-                    }
-
                     // Unset (needs to be first)
                     for (var i = 0; i < gradPointers.length; i++) {
                         for (var l = 0; l < unsetManager.length; l++) {
@@ -419,11 +342,6 @@ function graph(element, DATA, title) {
 
                 function clickRoutine(prop, manager, value) {
                     if ($(prop).prop('checked')) {
-                        // Cover up extra lines
-                        /*if (value < numY1 - 1) {
-                            //for (var i = 0; i < )
-                            covers[value].attr("style", "opacity: 1");
-                        }*/
                         // Turn all off when filter selection is made
                         if ($('#all').prop('checked')) {
                             $('#all').prop('checked', false).change();
@@ -498,10 +416,10 @@ function graph(element, DATA, title) {
                     }
                 });
 
-                $("#outline").change(function() {
+                /*$("#outline").change(function() {
                     var opacity = $(this).prop('checked') ? 1 : 0;
                     outline.style("opacity", opacity);
-                });
+                });*/
             });
             // End Data2 Function
         }
@@ -549,13 +467,7 @@ function graph(element, DATA, title) {
 // Data Files
 var DATA1 = {
     g1: "http://kp646576.github.io/SoD-Grapher/data/sound_1.csv",
-    g2: "http://kp646576.github.io/SoD-Grapher/data/color_1.csv"
+    g2: "../data/color_1.csv"
 };
 
-var DATA2 = {
-    g1: "http://kp646576.github.io/SoD-Grapher/data/sound_2.csv",
-    g2: "http://kp646576.github.io/SoD-Grapher/data/color_2.csv"
-};
-
-graph("graph1", DATA1, "Stages of Distraction Conversation 1");
-graph("graph2", DATA2, "Stages of Distraction Conversation 2");
+graph("graph1", DATA1, "Stages of Distraction Conversation Graph Demo");
