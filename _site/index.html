@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/grapher.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <style>
+    div {
+        font-family: Arial;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="graph1"></div>
+    <div id="graph2"></div>
+    <div style="margin-left: 120px">Filters</div>
+    <div style="margin-left: 120px">
+        <input data-toggle="toggle" data-onstyle="success" id="other" type="checkbox" data-on="Other" data-off="Other">
+        <input data-toggle="toggle" data-onstyle="success" id="monitor" type="checkbox" data-on="Monitor" data-off="Monitor">
+        <input data-toggle="toggle" data-onstyle="success" id="keyboard" type="checkbox" data-on="Keyboard" data-off="Keyboard">
+        <input data-toggle="toggle" data-onstyle="success" id="face" type="checkbox" data-on="Face" data-off="Face">
+    </div>
+    <div style="margin-left: 120px">
+        <input data-toggle="toggle" data-onstyle="success" id="two-sp-one-ty" type="checkbox" data-width="200" data-on="2 Speakers & 1 Typer" data-off="2 Speakers & 1 Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="two-sp" type="checkbox" data-on="2 Speakers" data-off="2 Speakers">
+        <input data-toggle="toggle" data-onstyle="success" id="one-sp-one-ty" type="checkbox" data-width="200" data-on="1 Speaker & Typer" data-off="1 Speaker & Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="one-sp" type="checkbox" data-on="1 Speaker" data-off="1 Speaker">
+        <input data-toggle="toggle" data-onstyle="success" id="one-ty" type="checkbox" data-on="1 Typer" data-off="1 Typer">
+        <input data-toggle="toggle" data-onstyle="success" id="silent" type="checkbox" data-on="Silent" data-off="Silent">
+    </div>
+    <div style="margin-left: 120px">
+        <input data-toggle="toggle" data-onstyle="success" id="outline" type="checkbox" data-on="Outline" data-off="Outline">
+        <input data-toggle="toggle" data-onstyle="success" id="all" type="checkbox" data-on="Show All" data-off="Show All" checked>
+    </div>
+    <!-- <button id="save">Save as Image</button>
+    <h2>SVG dataurl:</h2>
+    <div id="svgdataurl"></div>
+    <h2>SVG converted to PNG dataurl via HTML5 CANVAS:</h2>
+    <div id="pngdataurl"></div>
+    <canvas width="960" height="500" style="display:none"></canvas> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script src="js/d3.js"></script>
+    <script src="js/d3.tip.js"></script>
+    <script src="js/grapher.js"></script>
+</body>
+
+</html>
