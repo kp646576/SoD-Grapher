@@ -12,7 +12,7 @@ function graph(element, DATA, title) {
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 800 - MARGINS.left - MARGINS.right;
+    var WIDTH = 1000 - MARGINS.left - MARGINS.right;
     var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
