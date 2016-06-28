@@ -1,3 +1,4 @@
+// Cannot make data folder private on GH Pages to use d3.csv
 document.domain = 'kp646576.github.io';
 function graph(element, DATA, title) {
 
@@ -11,7 +12,7 @@ function graph(element, DATA, title) {
         yLabel: 20,
         yAxisLabel: 60
     };
-    var WIDTH = 1200 - MARGINS.left - MARGINS.right;
+    var WIDTH = 800 - MARGINS.left - MARGINS.right;
     var HEIGHT = 500 - MARGINS.top - MARGINS.bottom;
 
     var GRAPH = {
@@ -466,8 +467,8 @@ function graph(element, DATA, title) {
 
 // Data Files
 var DATA1 = {
-    g1: "http://kp646576.github.io/SoD-Grapher/_data/sound_1.csv",
-    g2: "http://kp646576.github.io/SoD-Grapher/_data/color_1.csv"
+    g1: "http://kp646576.github.io/SoD-Grapher/data/sound_1.csv",
+    g2: "http://kp646576.github.io/SoD-Grapher/data/color_1.csv"
 };
 
 graph("graph1", DATA1, "Stages of Distraction Conversation Graph Demo");
