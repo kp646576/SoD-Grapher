@@ -545,16 +545,15 @@ function graph(element, DATA, title) {
 
 }
 
-
 // Data Files
 var DATA1 = {
-    g1: "../data/sound_1.csv",
-    g2: "../data/color_1.csv"
+    g1: "http://kp646576.github.io/SoD-Grapher/_data/sound_1.csv",
+    g2: "http://kp646576.github.io/SoD-Grapher/_data/color_1.csv"
 };
 
 var DATA2 = {
-    g1: "../data/sound_2.csv",
-    g2: "../data/color_2.csv"
+    g1: "http://kp646576.github.io/SoD-Grapher/_data/sound_2.csv",
+    g2: "http://kp646576.github.io/SoD-Grapher/_data/color_2.csv"
 };
 
 graph("graph1", DATA1, "Stages of Distraction Conversation 1");
