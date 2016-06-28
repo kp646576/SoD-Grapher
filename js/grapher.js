@@ -1,4 +1,4 @@
-document.domain = 'kp646576.github.io/SoD-Grapher';
+document.domain = 'kp646576.github.io';
 function graph(element, DATA, title) {
 
     // Graph Initializations
